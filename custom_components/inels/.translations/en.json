@@ -1,0 +1,33 @@
+{
+    "config": {
+        "title": "Inels",
+        "step": {
+            "user": {
+                "title": "Inels",
+                "description": "If you need help with the configuration have a look here: https://github.com/JH-Soft-Technology/InelsForHass",
+                "data": {
+                    "host": "Host",
+                    "port": "Port",
+                    "version": "Version"
+                }
+            }
+        },
+        "error": {
+            "auth": "Some of the inputs is wrong."
+        },
+        "abort": {
+            "single_instance_allowed": "Only a single configuration of Inels is allowed."
+        }
+    },
+    "options": {
+        "step": {
+            "user": {
+                "data": {
+                    "binary_sensor": "Binary sensor enabled",
+                    "sensor": "Sensor enabled",
+                    "switch": "Switch enabled"
+                }
+            }
+        }
+    }
+}
