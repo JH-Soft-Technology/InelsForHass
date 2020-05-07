@@ -1,0 +1,9 @@
+{
+    "name": "InelsForHass (Inels smart home solution integration)",
+    "hide_default_branch": true,
+    "hacs": "0.24.0",
+    "domains": [
+        "switch"
+    ],
+    "homeassistant": "0.109.3"
+}
