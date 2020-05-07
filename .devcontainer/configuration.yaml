@@ -6,6 +6,6 @@ logger:
 frontend:
   themes: !include_dir_merge_named themes
 
-ptvsd:
-  wait: True
+# ptvsd:
+#   wait: True
 
