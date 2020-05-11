@@ -29,16 +29,17 @@ class InelsEntity(entity.Entity):
         return {
             "identifiers": {(DOMAIN, self.unique_id)},
             "name": self.name,
-            "model": VERSION,
+            "model": type(self.device).__name__,
             "manufacturer": NAME,
+            "sw_version": VERSION,
         }
 
     @property
     def device_state_attributes(self):
         """Return the state attributes."""
         return {
-            "time": "X",
-            "static": "Y",
+            "inels_type": type(self.device).__name__,
+            "inels_id": self.device.unique_id,
         }
 
     async def async_added_to_hass(self):
