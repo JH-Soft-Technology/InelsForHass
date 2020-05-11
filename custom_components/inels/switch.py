@@ -7,7 +7,7 @@ from homeassistant.components.switch import SwitchDevice
 from custom_components.inels.const import (
     DOMAIN,
     DOMAIN_DATA,
-    ICON,
+    ICON_SWITCH,
     SWITCH,
 )
 from custom_components.inels.entity import InelsEntity
@@ -45,12 +45,12 @@ class InelsSwitch(InelsEntity, SwitchDevice):
     @property
     def name(self):
         """Return the name of the switch."""
-        return "XY"
+        return self.device.name
 
     @property
     def icon(self):
         """Return the icon of this switch."""
-        return ICON
+        return ICON_SWITCH
 
     @property
     def is_on(self):

@@ -1,3 +1,5 @@
+[![Board Status](https://dev.azure.com/JH-Soft-Technology/ea6666c8-9de9-44c9-9767-69a01e3640dc/93f17136-8240-4edb-bd99-efdb435cca03/_apis/work/boardbadge/79979854-27b8-4ce5-b2f0-111ba419b94a?columnOptions=1)](https://dev.azure.com/JH-Soft-Technology/ea6666c8-9de9-44c9-9767-69a01e3640dc/_boards/board/t/93f17136-8240-4edb-bd99-efdb435cca03/Microsoft.RequirementCategory/)
+
 # InelsForHass is a Home Assistant HACS itegration for Elko inels smart home
 
 _Integrates all common devices from Inels BUS system into the Home Assistant._

@@ -8,7 +8,7 @@ VERSION = "0.0.1"
 ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/Issues"
 
 # Icons
-ICON = "mdi:format-quote-close"
+ICON_SWITCH = "mdi:power-socket"
 
 # Device classes
 BINARY_SENSOR_DEVICE_CLASS = "connectivity"
