@@ -3,7 +3,8 @@
     "hide_default_branch": true,
     "hacs": "0.24.0",
     "domains": [
-        "switch"
+        "switch",
+        "light"
     ],
     "homeassistant": "0.109.3"
 }
