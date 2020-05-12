@@ -9,15 +9,15 @@ ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/Issues"
 
 # Icons
 ICON_SWITCH = "mdi:power-socket"
+ICON_LIGHT = "mdi:lightbulb"
 
 # Device classes
 BINARY_SENSOR_DEVICE_CLASS = "connectivity"
 
 # Platforms
-BINARY_SENSOR = "binary_sensor"
-SENSOR = "sensor"
 SWITCH = "switch"
-PLATFORMS = [SWITCH]
+LIGHT = "light"
+PLATFORMS = [SWITCH, LIGHT]
 
 
 # Configuration and options
