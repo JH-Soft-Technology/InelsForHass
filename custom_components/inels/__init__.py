@@ -89,7 +89,6 @@ class InelsDataUpdateCoordinator(DataUpdateCoordinator):
         """Update data via library."""
         try:
             data = self.api.getAllDevices()
-            _LOGGER.info(data)
             return data
         except Exception as exception:
             raise UpdateFailed(exception)

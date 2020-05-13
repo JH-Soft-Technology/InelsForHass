@@ -2,7 +2,11 @@
 import logging
 
 from pyinels.device.pyLight import pyLight
-from homeassistant.components.light import LightEntity
+
+try:
+    from homeassistant.components.light import LightEntity
+except:
+    from homeassistant.components.light import Light as LightEntity
 
 from custom_components.inels.const import (
     DOMAIN,
