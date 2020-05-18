@@ -29,7 +29,7 @@ class InelsEntity(entity.Entity):
         return {
             "identifiers": {(DOMAIN, self.unique_id)},
             "name": self.name,
-            "model": type(self.device).__name__,
+            "model": type(self).__name__,
             "manufacturer": NAME,
             "sw_version": VERSION,
         }
