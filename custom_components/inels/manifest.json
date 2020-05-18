@@ -8,6 +8,6 @@
     "@jhoralek"
   ],
   "requirements": [
-    "pyinels==0.4.13"
+    "pyinels==0.5.2"
   ]
 }
