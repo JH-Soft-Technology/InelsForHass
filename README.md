@@ -10,14 +10,13 @@ InelsForHass gives you a chance to control your proprietary Inels devieces throu
 
 ## Supported devices
 
-- Common and dimmer lights
-- Switches
-- Shades
-- Garage doors
-- Heating
-- Weather stations
-- Lara radio
-- Ventilation system
+- [x] Ordinary and dimmable lights
+- [x] Switches
+- [] Shades
+- [] Garage doors
+- [] Heating
+- [] Weather stations
+- [] Lara radio
 
 ## Issues
 
