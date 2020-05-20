@@ -10,6 +10,7 @@ ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/Issues"
 # Icons
 ICON_SWITCH = "mdi:power-socket"
 ICON_LIGHT = "mdi:lightbulb"
+ICON_DOOR = "mdi:gate"
 
 # Device classes
 BINARY_SENSOR_DEVICE_CLASS = "connectivity"
@@ -17,6 +18,8 @@ BINARY_SENSOR_DEVICE_CLASS = "connectivity"
 # Platforms
 SWITCH = "switch"
 LIGHT = "light"
+DOOR = "door"
+
 PLATFORMS = [SWITCH, LIGHT]
 
 

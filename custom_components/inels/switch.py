@@ -2,6 +2,8 @@
 import logging
 
 from pyinels.device.pySwitch import pySwitch
+from pyinels.device.pyDoor import pyDoor
+
 from homeassistant.components.switch import SwitchDevice
 
 from custom_components.inels.const import (
@@ -9,9 +11,10 @@ from custom_components.inels.const import (
     DOMAIN_DATA,
     ICON_SWITCH,
     SWITCH,
+    DOOR,
+    ICON_DOOR,
 )
 from custom_components.inels.entity import InelsEntity
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,12 +24,21 @@ async def async_setup_entry(hass, entry, async_add_devices):
 
     _LOGGER.info("Setting up switches")
 
-    devices = hass.data[DOMAIN][DOMAIN_DATA]
+    entities = hass.data[DOMAIN][DOMAIN_DATA]
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
-    switches = [pySwitch(dev) for dev in devices if dev.type == SWITCH]
+    devices = [dev for dev in entities if dev.type == SWITCH or dev.type == DOOR]
 
-    async_add_devices([InelsSwitch(coordinator, switch) for switch in switches], True)
+    switches = [pySwitch(dev) for dev in devices if dev.type == SWITCH]
+    doors = [pyDoor(dev) for dev in devices if dev.type == DOOR]
+
+    if len(switches) > 0:
+        async_add_devices(
+            [InelsSwitch(coordinator, switch) for switch in switches], True
+        )
+
+    if len(doors) > 0:
+        async_add_devices([InelsDoor(coordinator, door) for door in doors], True)
 
 
 class InelsSwitch(InelsEntity, SwitchDevice):
@@ -56,3 +68,12 @@ class InelsSwitch(InelsEntity, SwitchDevice):
     def is_on(self):
         """Return true if the switch is on."""
         return self.device.state
+
+
+class InelsDoor(InelsSwitch):
+    """Inels door class implements InelsSwitch."""
+
+    @property
+    def icon(self):
+        """Return the icon of this door."""
+        return ICON_DOOR
