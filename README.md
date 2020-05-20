@@ -13,7 +13,7 @@ InelsForHass gives you a chance to control your proprietary Inels devieces throu
 - [x] Ordinary and dimmable lights
 - [x] Switches
 - [ ] Shades
-- [ ] Garage doors
+- [x] Garage doors
 - [ ] Heating
 - [ ] Weather stations
 - [ ] Lara radio
