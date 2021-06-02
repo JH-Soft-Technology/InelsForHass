@@ -1,6 +1,7 @@
 {
   "domain": "inels",
   "name": "Inels",
+  "version": "0.2.0",
   "documentation": "https://github.com/JH-Soft-Technology/InelsForHass",
   "dependencies": [],
   "config_flow": true,
@@ -8,6 +9,6 @@
     "@jhoralek"
   ],
   "requirements": [
-    "pyinels==0.5.4"
+    "pyinels==0.5.11"
   ]
 }
