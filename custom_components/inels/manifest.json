@@ -1,6 +1,7 @@
 {
   "domain": "inels",
   "name": "Inels",
+  "version": "0.1.0",
   "documentation": "https://github.com/JH-Soft-Technology/InelsForHass",
   "dependencies": [],
   "config_flow": true,
