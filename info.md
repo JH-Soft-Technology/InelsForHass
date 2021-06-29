@@ -25,7 +25,7 @@ InelsForHass gives you a chance to control your proprietary Inels devieces throu
 
 - [x] Ordinary and dimmable lights
 - [x] Switches
-- [x] Shades
+- [ ] Shades
 - [x] Garage doors
 - [ ] Heating
 - [ ] Weather stations

@@ -22,7 +22,7 @@ MAX_BRIGHTNESS = RANGE_BRIGHTNESS[1]
 
 
 async def async_setup_entry(hass, entry, async_add_devices):
-    """Setup light platform."""
+    """Setup sensor platform."""
 
     _LOGGER.info("Setting up lights")
 
@@ -88,7 +88,7 @@ class InelsLightBase(InelsEntity, LightEntity):
 
     @property
     def is_on(self):
-        """Return true if the light is on."""
+        """Return true if the switch is on."""
         return self._state
 
     def update(self):

@@ -3,7 +3,7 @@
 NAME = "Inels"
 DOMAIN = "inels"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.2.0"
+VERSION = "0.1.0"
 
 ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/Issues"
 
@@ -11,19 +11,16 @@ ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/Issues"
 ICON_SWITCH = "mdi:power-socket"
 ICON_LIGHT = "mdi:lightbulb"
 ICON_DOOR = "mdi:gate"
-ICON_SHUTTER = "mdi:window-shutter"
 
 # Device classes
 BINARY_SENSOR_DEVICE_CLASS = "connectivity"
-DEVICE_CLASS_SHUTTER = "shutter"
 
 # Platforms
 SWITCH = "switch"
 LIGHT = "light"
 DOOR = "door"
-COVER = "cover"
 
-PLATFORMS = [SWITCH, LIGHT, COVER]
+PLATFORMS = [SWITCH, LIGHT]
 
 
 # Configuration and options
