@@ -1,5 +1,5 @@
 {
-    "name": "InelsForHass (Inels smart home solution integration)",
+    "name": "InelsForHass 0.1.0 (Inels smart home solution integration)",
     "hide_default_branch": true,
     "hacs": "0.24.0",
     "domains": [
