@@ -3,7 +3,7 @@
 NAME = "Inels"
 DOMAIN = "inels"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.2.0"
+VERSION = "0.2.2"
 
 ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/Issues"
 

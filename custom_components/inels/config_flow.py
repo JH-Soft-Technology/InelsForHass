@@ -7,7 +7,7 @@ from homeassistant.core import callback
 
 from pyinels.api import Api
 
-from custom_components.inels.const import (  # pylint: disable=unused-import
+from custom_components.inels.const import (
     CONF_HOST,
     CONF_PORT,
     CONF_VERSION,
@@ -83,7 +83,8 @@ class InelsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     raise Exception("not_available")
 
             return True
-        except Exception:  # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
+            print(ex)
             pass
         return False
 
