@@ -5,8 +5,10 @@
 	"appPort": [
 		"9123:8123"
 	],
-	"postCreateCommand": "container install",
+	"postCreateCommand": "bash ./.devcontainer/postCreateCommand.sh",
+	"remoteUser": "root",
 	"runArgs": [
+		"--network=host",
 		"-v",
 		"${env:HOME}${env:USERPROFILE}/.ssh:/tmp/.ssh"
 	],
