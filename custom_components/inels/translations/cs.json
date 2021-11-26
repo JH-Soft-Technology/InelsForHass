@@ -1,0 +1,23 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Zařízení je již nastaveno."
+        },
+        "error": {
+            "cannot_connect": "Nepovedlo se připojit",
+            "invalid_auth": "Nesprávné ověření",
+            "unknown": "Neočekávaná vyjímka"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "host": "URL",
+                    "port": "Port služby",
+                    "unit": "Typ jednotky"
+                },
+                "description": "Pokud si nevíte rady, tak navštivte: https://github.com/JH-Soft-Technology/InelsForHass",
+                "title": "iNels"
+            }
+        }
+    }
+}
