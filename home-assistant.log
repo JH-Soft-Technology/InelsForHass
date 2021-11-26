@@ -1,0 +1,41 @@
+2021-09-16 13:31:53 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration inels which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2021-09-16 13:31:59 WARNING (MainThread) [homeassistant.util.executor] Thread[SyncWorker_0] is still running at shutdown: File "/usr/lib/python3.8/threading.py", line 890, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.8/concurrent/futures/thread.py", line 80, in _worker
+    work_item.run()
+  File "/usr/lib/python3.8/concurrent/futures/thread.py", line 57, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/usr/lib/python3.8/site-packages/homeassistant/requirements.py", line 159, in _install
+    return pkg_util.install_package(req, **kwargs)
+  File "/usr/lib/python3.8/site-packages/homeassistant/util/package.py", line 97, in install_package
+    _, stderr = process.communicate()
+  File "/usr/lib/python3.8/subprocess.py", line 1024, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.8/subprocess.py", line 1866, in _communicate
+    ready = selector.select(timeout)
+  File "/usr/lib/python3.8/selectors.py", line 415, in select
+    fd_event_list = self._selector.poll(timeout)
+2021-09-16 13:32:00 WARNING (MainThread) [homeassistant.util.executor] Thread[SyncWorker_0] is still running at shutdown: File "/usr/lib/python3.8/threading.py", line 890, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.8/concurrent/futures/thread.py", line 80, in _worker
+    work_item.run()
+  File "/usr/lib/python3.8/concurrent/futures/thread.py", line 57, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/usr/lib/python3.8/site-packages/homeassistant/requirements.py", line 159, in _install
+    return pkg_util.install_package(req, **kwargs)
+  File "/usr/lib/python3.8/site-packages/homeassistant/util/package.py", line 97, in install_package
+    _, stderr = process.communicate()
+  File "/usr/lib/python3.8/subprocess.py", line 1024, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.8/subprocess.py", line 1866, in _communicate
+    ready = selector.select(timeout)
+  File "/usr/lib/python3.8/selectors.py", line 415, in select
+    fd_event_list = self._selector.poll(timeout)

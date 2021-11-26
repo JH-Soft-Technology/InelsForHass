@@ -1,118 +1,97 @@
-"""
-Custom integration to integrate inels with Home Assistant.
-
-For more details about this integration, please refer to
-https://github.com/JH-Soft-Technology/InelsForHass
-"""
-import asyncio
+"""The inels integration."""
+from __future__ import annotations
 import logging
 from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import Config, HomeAssistant
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-
-from pyinels.api import Api
-
-from .const import (
-    CONF_HOST,
-    CONF_PORT,
-    CONF_VERSION,
-    DOMAIN,
-    DOMAIN_DATA,
-    PLATFORMS,
-    STARTUP_MESSAGE,
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator,
+    UpdateFailed,
 )
 
-SCAN_INTERVAL = timedelta(seconds=30)
+from pyinels.api import Api
+from .const import (
+    DOMAIN,
+    HOST_STR,
+    PLATFORMS,
+    PORT_STR,
+    STARTUP_MESSAGE,
+    UNIT_STR,
+    DOMAIN_DATA,
+)
 
 _LOGGER = logging.getLogger(__name__)
+SCAN_INTERVAL = timedelta(seconds=5)
 
 
-async def async_setup(hass: HomeAssistant, config: Config):
-    """Set up this integration using YAML is not supported."""
-    return True
-
-
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
-    """Set up this integration using UI."""
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up inels from a config entry."""
     if hass.data.get(DOMAIN) is None:
         hass.data.setdefault(DOMAIN, {})
         _LOGGER.info(STARTUP_MESSAGE)
 
-    host = entry.data.get(CONF_HOST)
-    port = entry.data.get(CONF_PORT)
-    version = entry.data.get(CONF_VERSION)
+    host = entry.data.get(HOST_STR)
+    port = entry.data.get(PORT_STR)
+    unit = entry.data.get(UNIT_STR)
 
-    _LOGGER.info("Creating coordinator")
+    _LOGGER.info("Creating iNels coordinator")
 
-    coordinator = InelsDataUpdateCoordinator(
-        hass, host=host, port=port, version=version
-    )
-
+    coordinator = InelsDataUpdateCoordinator(hass, host=host, port=port, unit=unit)
     await coordinator.async_refresh()
 
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
-    _LOGGER.info("Loading platforms with entries ")
+    hass.data[DOMAIN][entry.entry_id] = coordinator
+    hass.data[DOMAIN][DOMAIN_DATA] = await hass.async_add_executor_job(
+        coordinator.api.getAllDevices
+    )
+
+    _LOGGER.info("Loading platforms with entries")
     _LOGGER.info(entry)
 
-    hass.data[DOMAIN][entry.entry_id] = coordinator
-    hass.data[DOMAIN][DOMAIN_DATA] = coordinator.api.getAllDevices()
+    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
 
-    for platform in PLATFORMS:
-        if entry.options.get(platform, True):
-            coordinator.platforms.append(platform)
-            hass.async_add_job(
-                hass.config_entries.async_forward_entry_setup(entry, platform)
-            )
-
-    entry.add_update_listener(async_reload_entry)
     return True
 
 
-class InelsDataUpdateCoordinator(DataUpdateCoordinator):
-    """Class to manage fetching data from the API."""
-
-    def __init__(self, hass, host, port, version):
-        """Initialize."""
-        self.api = Api(host, str(port), version)
-        self.platforms = []
-
-        super().__init__(
-            hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL,
-        )
-
-    async def _async_update_data(self):
-        """Update data via library."""
-        try:
-            data = self.api.getAllDevices()
-            return data
-        except Exception as exception:
-            raise UpdateFailed(exception)
-
-
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
-    """Handle removal of an entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-    unloaded = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in PLATFORMS
-                if platform in coordinator.platforms
-            ]
-        )
-    )
-    if unloaded:
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    return unloaded
+    return unload_ok
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Reload config entry."""
     await async_unload_entry(hass, entry)
     await async_setup_entry(hass, entry)
+
+
+class InelsDataUpdateCoordinator(DataUpdateCoordinator):
+    """Class to manage fetching data from the API."""
+
+    def __init__(self, hass: HomeAssistant, host, port, unit):
+        """Initialize."""
+        self.api = Api(host, str(port), unit)
+        self.hass = hass
+        self.platforms = []
+
+        super().__init__(
+            hass,
+            _LOGGER,
+            name=DOMAIN,
+            update_interval=SCAN_INTERVAL,
+        )
+
+    async def _async_update_data(self):
+        """Update data via library."""
+        try:
+            data = await self.hass.async_add_executor_job(self.api.getAllDevices)
+            return data
+        except Exception as exception:
+            raise UpdateFailed(exception)

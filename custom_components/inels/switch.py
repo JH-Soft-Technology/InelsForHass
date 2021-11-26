@@ -3,23 +3,25 @@ import logging
 
 from pyinels.device.pySwitch import pySwitch
 from pyinels.device.pyDoor import pyDoor
+import homeassistant
 
+from homeassistant.components.inels.entity import InelsEntity
 from homeassistant.components.switch import SwitchDevice
+from homeassistant.core import HomeAssistant
 
-from custom_components.inels.const import (
+from .const import (
     DOMAIN,
     DOMAIN_DATA,
     ICON_SWITCH,
-    SWITCH,
-    DOOR,
+    PLATFORM_SWITCH,
+    PLATFORM_DOOR,
     ICON_DOOR,
 )
-from custom_components.inels.entity import InelsEntity
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, entry, async_add_devices):
+async def async_setup_entry(hass: homeassistant, entry, async_add_devices):
     """Setup switch platform."""
 
     _LOGGER.info("Setting up switches")
@@ -27,10 +29,22 @@ async def async_setup_entry(hass, entry, async_add_devices):
     entities = hass.data[DOMAIN][DOMAIN_DATA]
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
-    devices = [dev for dev in entities if dev.type == SWITCH or dev.type == DOOR]
+    devices = [
+        dev
+        for dev in entities
+        if dev.type == PLATFORM_SWITCH or dev.type == PLATFORM_DOOR
+    ]
 
-    switches = [pySwitch(dev) for dev in devices if dev.type == SWITCH]
-    doors = [pyDoor(dev) for dev in devices if dev.type == DOOR]
+    switches = [
+        await hass.async_add_executor_job(pySwitch, dev)
+        for dev in devices
+        if dev.type == PLATFORM_SWITCH
+    ]
+    doors = [
+        await hass.async_add_executor_job(pyDoor, dev)
+        for dev in devices
+        if dev.type == PLATFORM_DOOR
+    ]
 
     if len(switches) > 0:
         async_add_devices(
@@ -44,14 +58,15 @@ async def async_setup_entry(hass, entry, async_add_devices):
 class InelsSwitch(InelsEntity, SwitchDevice):
     """Inels switch class."""
 
-    async def async_turn_on(self, **kwargs):  # pylint: disable=unused-argument
+    async def async_turn_on(self):
         """Turn on the switch."""
-        self.device.turn_on()
+
+        await self.hass.async_add_executor_job(self.device.turn_on)
         await self.coordinator.async_request_refresh()
 
-    async def async_turn_off(self, **kwargs):  # pylint: disable=unused-argument
+    async def async_turn_off(self):
         """Turn off the switch."""
-        self.device.turn_off()
+        await self.hass.async_add_executor_job(self.device.turn_off)
         await self.coordinator.async_request_refresh()
 
     @property

@@ -1,126 +1,96 @@
-"""Adds config flow for Inels."""
+"""Config flow for inels integration."""
+from __future__ import annotations
+
 import logging
+from typing import Any
+
 import voluptuous as vol
-import async_timeout
+
 from homeassistant import config_entries
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResult
+from homeassistant.exceptions import HomeAssistantError
 
 from pyinels.api import Api
 
-from custom_components.inels.const import (
-    CONF_HOST,
-    CONF_PORT,
-    CONF_VERSION,
+from .const import (
     DOMAIN,
-    NAME,
-    PLATFORMS,
+    HOST_STR,
+    PORT_STR,
+    TITLE,
+    UNIT_STR,
+    USER_STR,
+    TITLE_STR,
+    ERROR_BASE_INVALID_AUTH,
+    ERROR_BASE,
+    ERROR_BASE_CANNOT_CONNECT,
+    ERROR_BASE_UNKNOWN,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class InelsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for Inels."""
+STEP_USER_DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required(HOST_STR): str,
+        vol.Required(PORT_STR): int,
+        vol.Required(UNIT_STR): str,
+    }
+)
+
+
+async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
+    """Validate the user input allows us to connect."""
+
+    api = Api(data[HOST_STR], data[PORT_STR], data[UNIT_STR])
+
+    # when PyPI library has no async methods then is neccessary to wrapp them into
+    # the hass.async_add_executor_job(func, param1[x], param2[y])
+    ping = await hass.async_add_executor_job(api.ping)
+
+    if ping == False:
+        raise CannotConnect
+
+    # Return info that you want to store in the config entry.
+    return {TITLE_STR: TITLE, "Data": data}
+
+
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for inels."""
 
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
-
-    _LOGGER.info("Config flow for Inels")
-
-    def __init__(self):
-        """Initialize."""
-        self._errors = {}
 
     async def async_step_user(
-        self, user_input=None  # pylint: disable=bad-continuation
-    ):
-        """Handle a flow initialized by the user."""
-        self._errors = {}
-
-        if self._async_current_entries():
-            return self.async_abort(reason="single_instance_allowed")
-
-        if user_input is not None:
-            valid = await self._test_credentials(
-                user_input[CONF_HOST], user_input[CONF_PORT], user_input[CONF_VERSION]
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the initial step."""
+        if user_input is None:
+            return self.async_show_form(
+                step_id=USER_STR, data_schema=STEP_USER_DATA_SCHEMA
             )
-            if valid:
-                return self.async_create_entry(title=NAME, data=user_input)
-            else:
-                self._errors["base"] = "auth"
 
-            return await self._show_config_form(user_input)
+        errors = {}
 
-        return await self._show_config_form(user_input)
-
-    @staticmethod
-    @callback
-    def async_get_options_flow(config_entry):
-        return InelsOptionsFlowHandler(config_entry)
-
-    async def _show_config_form(self, user_input):  # pylint: disable=unused-argument
-        """Show the configuration form to edit location data."""
-        return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_HOST): str,
-                    vol.Required(CONF_PORT): str,
-                    vol.Required(CONF_VERSION): str,
-                }
-            ),
-            errors=self._errors,
-        )
-
-    async def _test_credentials(self, host, port, version):
-        """Return true if credentials is valid."""
         try:
-            with async_timeout.timeout(5):
-                _LOGGER.info("Testing connection")
-                api = Api(host, str(port), version)
-
-                if not api.ping():
-                    raise Exception("not_available")
-
-            return True
-        except Exception as ex:  # pylint: disable=broad-except
-            print(ex)
-            pass
-        return False
-
-
-class InelsOptionsFlowHandler(config_entries.OptionsFlow):
-    """Inels config flow options handler."""
-
-    def __init__(self, config_entry):
-        """Initialize HACS options flow."""
-        _LOGGER.info("Initialize InelsOptionsFlowHandler")
-
-        self.config_entry = config_entry
-        self.options = dict(config_entry.options)
-
-    async def async_step_init(self, user_input=None):  # pylint: disable=unused-argument
-        """Manage the options."""
-        return await self.async_step_user()
-
-    async def async_step_user(self, user_input=None):
-        """Handle a flow initialized by the user."""
-        if user_input is not None:
-            self.options.update(user_input)
-            return await self._update_options()
+            info = await validate_input(self.hass, user_input)
+        except CannotConnect:
+            errors[ERROR_BASE] = ERROR_BASE_CANNOT_CONNECT
+        except InvalidAuth:
+            errors[ERROR_BASE] = ERROR_BASE_INVALID_AUTH
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception("Unexpected exception")
+            errors[ERROR_BASE] = ERROR_BASE_UNKNOWN
+        else:
+            return self.async_create_entry(title=info[TITLE_STR], data=user_input)
 
         return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(x, default=self.options.get(x, True)): bool
-                    for x in sorted(PLATFORMS)
-                }
-            ),
+            step_id=USER_STR, data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
 
-    async def _update_options(self):
-        """Update config entry options."""
-        return self.async_create_entry(
-            title=self.config_entry.data.get(NAME), data=self.options
-        )
+
+class CannotConnect(HomeAssistantError):
+    """Error to indicate we cannot connect."""
+
+
+class InvalidAuth(HomeAssistantError):
+    """Error to indicate there is invalid auth."""

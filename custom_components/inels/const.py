@@ -1,11 +1,22 @@
-"""Constants for inels."""
-# Base component constants
-NAME = "Inels"
+"""Constants for the inels integration."""
+
 DOMAIN = "inels"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.2.2"
+VERSION = "0.3.0"
 
 ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/Issues"
+
+TITLE = "iNELS"
+HOST_STR = "host"
+PORT_STR = "port"
+UNIT_STR = "unit"
+USER_STR = "user"
+TITLE_STR = "title"
+
+ERROR_BASE = "base"
+ERROR_BASE_CANNOT_CONNECT = "cannot_connect"
+ERROR_BASE_INVALID_AUTH = "invalid_auth"
+ERROR_BASE_UNKNOWN = "unknown"
 
 # Icons
 ICON_SWITCH = "mdi:power-socket"
@@ -13,32 +24,16 @@ ICON_LIGHT = "mdi:lightbulb"
 ICON_DOOR = "mdi:gate"
 ICON_SHUTTER = "mdi:window-shutter"
 
-# Device classes
-BINARY_SENSOR_DEVICE_CLASS = "connectivity"
-DEVICE_CLASS_SHUTTER = "shutter"
+PLATFORM_SWITCH = "switch"
+PLATFORM_LIGHT = "light"
+PLATFORM_COVER = "cover"
+PLATFORM_DOOR = "door"
 
-# Platforms
-SWITCH = "switch"
-LIGHT = "light"
-DOOR = "door"
-COVER = "cover"
-
-PLATFORMS = [SWITCH, LIGHT, COVER]
-
-
-# Configuration and options
-CONF_ENABLED = "enabled"
-CONF_HOST = "host"
-CONF_PORT = "port"
-CONF_VERSION = "version"
-
-# Defaults
-DEFAULT_NAME = DOMAIN
-
+PLATFORMS = [PLATFORM_SWITCH]
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
-{NAME}
+{TITLE}
 Version: {VERSION}
 This is a custom integration!
 If you have any issues with this you need to open an issue here:

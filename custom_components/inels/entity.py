@@ -1,7 +1,7 @@
 """InelsEntity class"""
 from homeassistant.helpers import entity
 
-from custom_components.inels.const import DOMAIN, VERSION, NAME
+from .const import DOMAIN, VERSION, TITLE
 
 
 class InelsEntity(entity.Entity):
@@ -30,7 +30,7 @@ class InelsEntity(entity.Entity):
             "identifiers": {(DOMAIN, self.unique_id)},
             "name": self.name,
             "model": type(self).__name__,
-            "manufacturer": NAME,
+            "manufacturer": TITLE,
             "sw_version": VERSION,
         }
 
