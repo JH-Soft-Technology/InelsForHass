@@ -7,7 +7,6 @@ import homeassistant
 
 from homeassistant.components.inels.entity import InelsEntity
 from homeassistant.components.switch import SwitchDevice
-from homeassistant.core import HomeAssistant
 
 from .const import (
     DOMAIN,
