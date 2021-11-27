@@ -4,16 +4,11 @@ import logging
 from pyinels.device.pyLight import pyLight
 from pyinels.const import RANGE_BRIGHTNESS
 
-try:
-    from homeassistant.components.light import LightEntity
-except:
-    from homeassistant.components.light import Light as LightEntity
-
+from homeassistant.components.light import LightEntity
 from homeassistant.components.light import ATTR_BRIGHTNESS, SUPPORT_BRIGHTNESS
 
-from custom_components.inels.const import DOMAIN, DOMAIN_DATA, ICON_LIGHT, LIGHT
-
 from custom_components.inels.entity import InelsEntity
+from custom_components.inels.const import DOMAIN, DOMAIN_DATA, ICON_LIGHT, PLATFORM_LIGHT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +27,11 @@ async def async_setup_entry(hass, entry, async_add_devices):
     dimmable_lights = []
     usual_lights = []
 
-    lights = [pyLight(dev) for dev in devices if dev.type == LIGHT]
+    lights = [
+        await hass.async_add_executor_job(pyLight, dev)
+        for dev in devices
+        if dev.type == PLATFORM_LIGHT
+    ]
 
     for light in lights:
         if light.has_brightness is True:
@@ -60,18 +59,18 @@ class InelsLightBase(InelsEntity, LightEntity):
 
         self._light = light
         self._coordinator = coordinator
-        self._state = self._light.state
+        self._state = False
 
     async def async_turn_on(self, **kwargs):  # pylint: disable=unused-argument
         """Turn on the light."""
-        self._light.turn_on()
+        await self.hass.async_add_executor_job(self._light.turn_on)
         self._state = True
 
         await self._coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs):  # pylint: disable=unused-argument
         """Turn off the light."""
-        self._light.turn_off()
+        await self.hass.async_add_executor_job(self._light.turn_off)
         self._state = False
 
         await self._coordinator.async_request_refresh()
@@ -115,8 +114,8 @@ class InelsLightDimmable(InelsLightBase, LightEntity):
         self._features = 0
         self._light = light
         self._coordinator = coordinator
-        self._has_brightness = self._light.has_brightness
-        self._state = self._light.state
+        self._has_brightness = True
+        self._state = False
 
         if self._has_brightness is True:
             self._features = SUPPORT_BRIGHTNESS
@@ -144,10 +143,12 @@ class InelsLightDimmable(InelsLightBase, LightEntity):
         if ATTR_BRIGHTNESS in kwargs:
             brightness = int(kwargs[ATTR_BRIGHTNESS] / 2.55)
             self._brightness = brightness
-            self._light.set_brightness(float(brightness))
+            await self.hass.async_add_executor_job(
+                self._light.set_brightness, float(brightness)
+            )
             self._state = self._light.state
         else:
-            self._light.turn_on()
+            await self.hass.async_add_executor_job(self._light.turn_on)
             self._brightness = MAX_BRIGHTNESS
             self._state = True
 

@@ -3,12 +3,11 @@ import logging
 
 from pyinels.device.pySwitch import pySwitch
 from pyinels.device.pyDoor import pyDoor
-import homeassistant
 
-from homeassistant.components.inels.entity import InelsEntity
+from custom_components.inels.entity import InelsEntity
 from homeassistant.components.switch import SwitchDevice
 
-from .const import (
+from custom_components.inels.const import (
     DOMAIN,
     DOMAIN_DATA,
     ICON_SWITCH,
@@ -20,7 +19,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass: homeassistant, entry, async_add_devices):
+async def async_setup_entry(hass, entry, async_add_devices):
     """Setup switch platform."""
 
     _LOGGER.info("Setting up switches")
