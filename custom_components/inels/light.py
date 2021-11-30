@@ -39,6 +39,8 @@ async def async_setup_entry(hass, entry, async_add_devices):
         else:
             usual_lights.append(light)
 
+    await coordinator.async_refresh()
+
     if len(usual_lights) > 0:
         async_add_devices(
             [InelsLight(coordinator, light) for light in usual_lights], True
@@ -88,7 +90,7 @@ class InelsLightBase(InelsEntity, LightEntity):
     @property
     def is_on(self):
         """Return true if the light is on."""
-        return self._state
+        return self._light.state
 
     def update(self):
         """Update the data from the device."""
@@ -130,8 +132,7 @@ class InelsLightDimmable(InelsLightBase, LightEntity):
     def brightness(self):
         """Return the brightness of the light."""
         if self._has_brightness is True:
-            if self._brightness is None:
-                self._brightness = self._light.brightness()
+            self._brightness = self._light.brightness()
 
             return int(self._brightness * 2.55)
         return None
