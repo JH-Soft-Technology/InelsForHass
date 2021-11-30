@@ -44,6 +44,8 @@ async def async_setup_entry(hass, entry, async_add_devices):
         if dev.type == PLATFORM_DOOR
     ]
 
+    await coordinator.async_refresh()
+
     if len(switches) > 0:
         async_add_devices(
             [InelsSwitch(coordinator, switch) for switch in switches], True
