@@ -29,7 +29,11 @@ PLATFORM_LIGHT = "light"
 PLATFORM_COVER = "cover"
 PLATFORM_DOOR = "door"
 
+<<<<<<< HEAD
 PLATFORMS = [PLATFORM_SWITCH, PLATFORM_LIGHT, PLATFORM_COVER, PLATFORM_COVER]
+=======
+PLATFORMS = [PLATFORM_SWITCH, PLATFORM_LIGHT, PLATFORM_COVER]
+>>>>>>> a9d021028371f3be683609fc773bdb731f91d8b7
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
