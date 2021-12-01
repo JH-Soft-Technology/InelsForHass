@@ -5,23 +5,17 @@ from pyinels.device.pyShutter import pyShutter
 from pyinels.pyTimer import TimerError
 
 from pyinels.const import (
-    SUPPORT_OPEN,
-    SUPPORT_CLOSE,
-    SUPPORT_SET_POSITION,
-    SUPPORT_STOP,
-    STATE_OPEN,
     STATE_CLOSED,
     STATE_OPENING,
     STATE_CLOSING,
 )
 
-from homeassistant.components.cover import CoverEntity
+from homeassistant.components.cover import CoverEntity, DEVICE_CLASS_SHUTTER
 
 from custom_components.inels.const import (
     DOMAIN,
     DOMAIN_DATA,
     ICON_SHUTTER,
-    DEVICE_CLASS_SHUTTER,
 )
 
 from custom_components.inels.entity import InelsEntity
@@ -39,6 +33,8 @@ async def async_setup_entry(hass, entry, async_add_devices):
 
     shutters = [pyShutter(dev) for dev in entities if dev.type == DEVICE_CLASS_SHUTTER]
 
+    await coordinator.async_refresh()
+
     if len(shutters) > 0:
         async_add_devices(
             [InelsShutter(coordinator, shutter) for shutter in shutters], True
@@ -48,10 +44,18 @@ async def async_setup_entry(hass, entry, async_add_devices):
 class InelsShutter(InelsEntity, CoverEntity):
     """Inels shutter class."""
 
+    def __init__(self, coordinator, shutter):
+        """Initialization of the InelsShutter."""
+        super().__init__(coordinator, shutter)
+
+        self._shutter = shutter
+        self._coordinator = coordinator
+        self._state = STATE_CLOSED
+
     @property
     def name(self):
         """Device name."""
-        return self.device.name
+        return self._shutter.name
 
     @property
     def icon(self):
@@ -59,29 +63,24 @@ class InelsShutter(InelsEntity, CoverEntity):
         return ICON_SHUTTER
 
     @property
-    def supported_features(self):
-        """Supported features."""
-        return SUPPORT_OPEN | SUPPORT_CLOSE | SUPPORT_SET_POSITION | SUPPORT_STOP
-
-    @property
     def is_opening(self):
         """Shutter is opening."""
-        return self.device.state == STATE_OPENING
+        return self._shutter.state == STATE_OPENING
 
     @property
     def is_closing(self):
         """Shutter is closing."""
-        return self.device.state == STATE_CLOSING
+        return self._shutter.state == STATE_CLOSING
 
     @property
     def is_closed(self):
         """Shutter is closed."""
-        return self.device.state == STATE_CLOSED
+        return self._shutter.state == STATE_CLOSED
 
     @property
     def current_cover_position(self):
         """Current cover position."""
-        return self.device.current_position
+        return self._shutter.current_position
 
     # @property
     # def state(self):
@@ -104,19 +103,22 @@ class InelsShutter(InelsEntity, CoverEntity):
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
-        self.device.position = kwargs["position"]
+        self._shutter.position = kwargs["position"]
 
     async def async_open_cover(self, **kwargs):
         """Open the shutter."""
-        self.device.pull_up()
+        await self.hass.async_add_executor_job(self._shutter.pull_up)
+        await self._coordinator.async_request_refresh()
 
     async def async_close_cover(self, **kwargs):
         """Close shutter."""
-        self.device.pull_down()
+        await self.hass.async_add_executor_job(self._shutter.pull_down)
+        await self._coordinator.async_request_refresh()
 
     async def async_stop_cover(self, **kwargs):
         """Stop the shutter."""
         try:
-            self.device.stop()
+            await self.hass.async_add_executor_job(self._shutter.stop)
+            await self._coordinator.async_request_refresh()
         except TimerError:
             pass
