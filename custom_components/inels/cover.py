@@ -60,7 +60,11 @@ class InelsShutter(InelsEntity, CoverEntity):
     @property
     def icon(self):
         """Return the icon of this shutter."""
-        return ICON_SHUTTER
+        return (
+            ICON_SHUTTER_CLOSED
+            if self.current_cover_position == 0
+            else ICON_SHUTTER_OPENED
+        )
 
     @property
     def is_opening(self):
@@ -82,24 +86,29 @@ class InelsShutter(InelsEntity, CoverEntity):
         """Current cover position."""
         return self._shutter.current_position
 
-    # @property
-    # def state(self):
-    #     """Overided state CoverEntity."""
-    #     S = self  # constant
+    @property
+    def device_class(self):
+        """Shutter device class."""
+        return DEVICE_CLASS_SHUTTER
 
-    #     result = (
-    #         STATE_OPENING
-    #         if S.is_opening
-    #         else STATE_CLOSING
-    #         if S.is_closing
-    #         else STATE_CLOSED
-    #         if S.is_closed
-    #         else STATE_OPEN
-    #         if S.device.state == STATE_OPEN
-    #         else STATE_CLOSED
-    #     )
+    @property
+    def state(self):
+        """Overided state CoverEntity."""
+        S = self  # constant
 
-    #     return result
+        result = (
+            STATE_OPENING
+            if S.is_opening
+            else STATE_CLOSING
+            if S.is_closing
+            else STATE_CLOSED
+            if S.is_closed
+            else STATE_OPEN
+            if S.device.state == STATE_OPEN
+            else STATE_CLOSED
+        )
+
+        return result
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
