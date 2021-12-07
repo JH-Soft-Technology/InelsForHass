@@ -4,18 +4,20 @@ import logging
 from pyinels.device.pyShutter import pyShutter
 from pyinels.pyTimer import TimerError
 
-from pyinels.const import (
+from homeassistant.components.cover import (
+    CoverEntity,
+    DEVICE_CLASS_SHUTTER,
     STATE_CLOSED,
-    STATE_OPENING,
+    STATE_OPEN,
     STATE_CLOSING,
+    STATE_OPENING,
 )
-
-from homeassistant.components.cover import CoverEntity, DEVICE_CLASS_SHUTTER
 
 from custom_components.inels.const import (
     DOMAIN,
     DOMAIN_DATA,
-    ICON_SHUTTER,
+    ICON_SHUTTER_CLOSED,
+    ICON_SHUTTER_OPENED,
 )
 
 from custom_components.inels.entity import InelsEntity
