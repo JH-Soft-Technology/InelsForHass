@@ -5,7 +5,7 @@ from pyinels.device.pySwitch import pySwitch
 from pyinels.device.pyDoor import pyDoor
 
 from custom_components.inels.entity import InelsEntity
-from homeassistant.components.switch import SwitchDevice
+from homeassistant.components.switch import SwitchEntity
 
 from custom_components.inels.const import (
     DOMAIN,
@@ -55,7 +55,7 @@ async def async_setup_entry(hass, entry, async_add_devices):
         async_add_devices([InelsDoor(coordinator, door) for door in doors], True)
 
 
-class InelsSwitch(InelsEntity, SwitchDevice):
+class InelsSwitch(InelsEntity, SwitchEntity):
     """Inels switch class."""
 
     async def async_turn_on(self):
