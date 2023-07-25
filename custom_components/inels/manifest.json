@@ -1,7 +1,7 @@
 {
   "domain": "inels",
   "name": "Inels",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "documentation": "https://github.com/JH-Soft-Technology/InelsForHass",
   "dependencies": [],
   "config_flow": true,
@@ -9,7 +9,7 @@
     "@jhoralek"
   ],
   "requirements": [
-    "pyinels==0.6.11"
+    "pyinels==0.6.12"
   ],
   "iot_class": "local_polling"
 }
