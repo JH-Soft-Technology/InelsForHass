@@ -6,14 +6,14 @@ from pyinels.pyTimer import TimerError
 
 from homeassistant.components.cover import (
     CoverEntity,
-    DEVICE_CLASS_SHUTTER,
     STATE_CLOSED,
     STATE_OPEN,
     STATE_CLOSING,
-    STATE_OPENING,
+    STATE_OPENING
 )
 
 from custom_components.inels.const import (
+    CLASS_SHUTTER,
     DOMAIN,
     DOMAIN_DATA,
     ICON_SHUTTER_CLOSED,
@@ -33,7 +33,7 @@ async def async_setup_entry(hass, entry, async_add_devices):
     entities = hass.data[DOMAIN][DOMAIN_DATA]
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
-    shutters = [pyShutter(dev) for dev in entities if dev.type == DEVICE_CLASS_SHUTTER]
+    shutters = [pyShutter(dev) for dev in entities if dev.type == CLASS_SHUTTER]
 
     await coordinator.async_refresh()
 
@@ -91,7 +91,7 @@ class InelsShutter(InelsEntity, CoverEntity):
     @property
     def device_class(self):
         """Shutter device class."""
-        return DEVICE_CLASS_SHUTTER
+        return CLASS_SHUTTER
 
     @property
     def state(self):

@@ -5,7 +5,11 @@ from pyinels.device.pyLight import pyLight
 from pyinels.const import RANGE_BRIGHTNESS
 
 from homeassistant.components.light import LightEntity
-from homeassistant.components.light import ATTR_BRIGHTNESS, SUPPORT_BRIGHTNESS
+from homeassistant.components.light import (
+    ATTR_BRIGHTNESS,
+    SUPPORT_BRIGHTNESS,
+    ATTR_SUPPORTED_COLOR_MODES
+)
 
 from custom_components.inels.entity import InelsEntity
 from custom_components.inels.const import DOMAIN, DOMAIN_DATA, ICON_LIGHT, PLATFORM_LIGHT
@@ -120,7 +124,7 @@ class InelsLightDimmable(InelsLightBase, LightEntity):
         self._state = False
 
         if self._has_brightness is True:
-            self._features = SUPPORT_BRIGHTNESS
+            self._features = ATTR_SUPPORTED_COLOR_MODES
 
     @property
     def supported_features(self):

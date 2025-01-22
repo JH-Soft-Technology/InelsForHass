@@ -2,7 +2,7 @@
 
 DOMAIN = "inels"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.3.2"
+VERSION = "0.3.5"
 
 ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/Issues"
 
@@ -12,6 +12,8 @@ PORT_STR = "port"
 UNIT_STR = "unit"
 USER_STR = "user"
 TITLE_STR = "title"
+
+CLASS_SHUTTER = "shutter"
 
 ERROR_BASE = "base"
 ERROR_BASE_CANNOT_CONNECT = "cannot_connect"
