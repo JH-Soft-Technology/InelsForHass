@@ -12,7 +12,7 @@ from homeassistant.components.cover import (
     STATE_OPENING
 )
 
-from custom_components.inels.const import (
+from custom_components.inels_rpc.const import (
     CLASS_SHUTTER,
     DOMAIN,
     DOMAIN_DATA,
@@ -20,7 +20,7 @@ from custom_components.inels.const import (
     ICON_SHUTTER_OPENED,
 )
 
-from custom_components.inels.entity import InelsEntity
+from custom_components.inels_rpc.entity import InelsEntity
 
 _LOGGER = logging.getLogger(__name__)
 
