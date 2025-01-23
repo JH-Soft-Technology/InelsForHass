@@ -87,7 +87,7 @@ class InelsLightBase(InelsEntity, LightEntity):
 
     @property
     def supported_color_modes(self) -> set[ColorMode] | set[str] | None:
-        """Flag supported color modes. Overrided"""
+        """Flag supported color modes. Overrided."""
         return {ColorMode.ONOFF}
 
     @property
@@ -145,7 +145,7 @@ class InelsLightDimmable(InelsLightBase, LightEntity):
 
     @property
     def supported_color_modes(self) -> set[ColorMode] | set[str] | None:
-        """Flag supported color modes. Overrided"""
+        """Flag supported color modes. Overrided."""
         return {ColorMode.BRIGHTNESS}
 
     async def async_turn_on(self, **kwargs):  # pylint: disable=unused-argument
