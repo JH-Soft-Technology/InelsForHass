@@ -10,8 +10,8 @@ from homeassistant.components.light import (
     LightEntity,
 )
 
-from custom_components.inels.entity import InelsEntity
-from custom_components.inels.const import DOMAIN, DOMAIN_DATA, ICON_LIGHT, PLATFORM_LIGHT
+from custom_components.inels_rpc.entity import InelsEntity
+from custom_components.inels_rpc.const import DOMAIN, DOMAIN_DATA, ICON_LIGHT, PLATFORM_LIGHT
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -4,10 +4,10 @@ import logging
 from pyinels.device.pySwitch import pySwitch
 from pyinels.device.pyDoor import pyDoor
 
-from custom_components.inels.entity import InelsEntity
+from custom_components.inels_rpc.entity import InelsEntity
 from homeassistant.components.switch import SwitchEntity
 
-from custom_components.inels.const import (
+from custom_components.inels_rpc.const import (
     DOMAIN,
     DOMAIN_DATA,
     ICON_SWITCH,
