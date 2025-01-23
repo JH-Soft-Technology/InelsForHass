@@ -1,5 +1,4 @@
 {
     "name": "InelsForHass (Inels smart home solution integration)",
-    "country": "NO",
-    "homeassistant": "2025.1.0",
+    "homeassistant": "2025.1.0"
 }
