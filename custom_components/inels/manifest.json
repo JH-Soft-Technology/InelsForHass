@@ -1,6 +1,6 @@
 {
-  "domain": "inels",
-  "name": "Inels",
+  "domain": "inels_rpc",
+  "name": "Inels over XMLRPC",
   "codeowners": [
     "@jhoralek"
   ],
@@ -12,5 +12,5 @@
   "requirements": [
     "pyinels==0.6.12"
   ],
-  "version": "0.3.6"
+  "version": "0.3.7"
 }

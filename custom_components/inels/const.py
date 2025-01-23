@@ -1,6 +1,6 @@
 """Constants for the inels integration."""
 
-DOMAIN = "inels"
+DOMAIN = "inels_rpc"
 DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "0.3.6"
 
