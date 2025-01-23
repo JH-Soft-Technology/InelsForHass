@@ -1,13 +1,13 @@
 """Binary sensor platform for inels."""
 from homeassistant.components.binary_sensor import BinarySensorDevice
 
-from custom_components.inels.const import (
+from custom_components.inels_rpc.const import (
     BINARY_SENSOR,
     BINARY_SENSOR_DEVICE_CLASS,
     DEFAULT_NAME,
     DOMAIN,
 )
-from custom_components.inels.entity import InelsEntity
+from custom_components.inels_rpc.entity import InelsEntity
 
 
 async def async_setup_entry(hass, entry, async_add_devices):
