@@ -4,11 +4,10 @@ import logging
 from pyinels.device.pyLight import pyLight
 from pyinels.const import RANGE_BRIGHTNESS
 
-from homeassistant.components.light import LightEntity
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
-    SUPPORT_BRIGHTNESS,
-    ATTR_SUPPORTED_COLOR_MODES
+    ColorMode,
+    LightEntity,
 )
 
 from custom_components.inels.entity import InelsEntity
@@ -82,6 +81,16 @@ class InelsLightBase(InelsEntity, LightEntity):
         await self._coordinator.async_request_refresh()
 
     @property
+    def color_mode(self):
+        """Return color mode of the light."""
+        return ColorMode.ONOFF
+
+    @property
+    def supported_color_modes(self) -> set[ColorMode] | set[str] | None:
+        """Flag supported color modes. Overrided"""
+        return {ColorMode.ONOFF}
+
+    @property
     def name(self):
         """Return the name of the light."""
         return self._light.name
@@ -120,26 +129,24 @@ class InelsLightDimmable(InelsLightBase, LightEntity):
         self._features = 0
         self._light = light
         self._coordinator = coordinator
-        self._has_brightness = True
         self._state = False
-
-        if self._has_brightness is True:
-            self._features = ATTR_SUPPORTED_COLOR_MODES
-
-    @property
-    def supported_features(self):
-        """Supported feature of the light. We support brightnes.
-        In future maybee i RGB and temperature."""
-        return self._features
 
     @property
     def brightness(self):
         """Return the brightness of the light."""
-        if self._has_brightness is True:
-            self._brightness = self._light.brightness()
+        self._brightness = self._light.brightness()
 
-            return int(self._brightness * 2.55)
-        return None
+        return int(self._brightness * 2.55)
+
+    @property
+    def color_mode(self):
+        """Return color mode of the light."""
+        return ColorMode.BRIGHTNESS
+
+    @property
+    def supported_color_modes(self) -> set[ColorMode] | set[str] | None:
+        """Flag supported color modes. Overrided"""
+        return {ColorMode.BRIGHTNESS}
 
     async def async_turn_on(self, **kwargs):  # pylint: disable=unused-argument
         """Turn on the light."""
