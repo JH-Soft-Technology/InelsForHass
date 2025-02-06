@@ -32,6 +32,7 @@ class InelsEntity(entity.Entity):
             "model": type(self).__name__,
             "manufacturer": TITLE,
             "sw_version": VERSION,
+            "suggested_area": self.device.group
         }
 
     @property

@@ -13,7 +13,7 @@
                 "data": {
                     "host": "Service url",
                     "port": "Service port",
-                    "unit": "Centtral unit name"
+                    "unit": "Central unit name"
                 },
                 "description": "If you need help with the configuration have a look here: https://github.com/JH-Soft-Technology/InelsForHass",
                 "title": "iNels"

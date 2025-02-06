@@ -1,0 +1,23 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Az eszköz már be van állítva"
+        },
+        "error": {
+            "cannot_connect": "Kapcsolódási hiba",
+            "invalid_auth": "Érvénytelen belépési adatok",
+            "unknown": "Váratlan hiba"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "host": "Szerver URL",
+                    "port": "Szerver port",
+                    "unit": "CU név"
+                },
+                "description": "A beállításhoz való segítségért kattints erre a linkre: https://github.com/JH-Soft-Technology/InelsForHass",
+                "title": "iNels"
+            }
+        }
+    }
+}
