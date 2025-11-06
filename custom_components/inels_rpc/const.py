@@ -2,7 +2,7 @@
 
 DOMAIN = "inels_rpc"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.3.8"
+VERSION = "0.3.9"
 
 ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/Issues"
 
