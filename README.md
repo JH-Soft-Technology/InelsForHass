@@ -1,37 +1,137 @@
-[![Board Status](https://dev.azure.com/JH-Soft-Technology/ea6666c8-9de9-44c9-9767-69a01e3640dc/93f17136-8240-4edb-bd99-efdb435cca03/_apis/work/boardbadge/79979854-27b8-4ce5-b2f0-111ba419b94a?columnOptions=1)](https://dev.azure.com/JH-Soft-Technology/ea6666c8-9de9-44c9-9767-69a01e3640dc/_boards/board/t/93f17136-8240-4edb-bd99-efdb435cca03/Microsoft.RequirementCategory/)
+<p align="center">
+  <img src="custom_components/inels_rpc/brand/icon@2x.png" alt="InelsForHass" width="128">
+</p>
 
-# InelsForHass is a Home Assistant HACS itegration for Elko inels smart home
+<h1 align="center">InelsForHass</h1>
 
-_Integrates all common devices from Inels BUS system into the Home Assistant._
+<p align="center">
+  Home Assistant integration for the <b>iNELS BUS</b> smart home system by ELKO EP,<br>
+  connected through the iNELS <b>Connection Server</b> over XML-RPC.
+</p>
 
-## What?
+<p align="center">
+  <a href="https://github.com/JH-Soft-Technology/InelsForHass/releases"><img src="https://img.shields.io/github/v/release/JH-Soft-Technology/InelsForHass?color=41BDF5" alt="Release"></a>
+  <a href="https://hacs.xyz"><img src="https://img.shields.io/badge/HACS-Custom-41BDF5" alt="HACS"></a>
+  <img src="https://img.shields.io/badge/Home%20Assistant-2025.1%2B-41BDF5" alt="Home Assistant">
+  <a href="https://github.com/JH-Soft-Technology/InelsForHass/actions/workflows/validate.yml"><img src="https://github.com/JH-Soft-Technology/InelsForHass/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/JH-Soft-Technology/InelsForHass" alt="License"></a>
+</p>
 
-InelsForHass gives you a chance to control your proprietary Inels devieces through the Home Assistant.
+<p align="center">🌐 <a href="README.cs.md">Česká verze</a></p>
 
-## Supported devices
+---
 
-- [x] Ordinary and dimmable lights
-- [x] Switches
-- [x] Shades
-- [x] Garage doors
-- [ ] Heating
-- [ ] Weather stations
-- [ ] Lara radio
+## ✨ Features
 
-## HowTo
+| Platform | iNELS devices | What you get |
+|---|---|---|
+| 💡 `light` | on/off and dimmable lights | switching, brightness for dimmers |
+| 🔌 `switch` | relays, sockets, gates and garage doors | on/off |
+| 🪟 `cover` | shutters and blinds | open, close, stop |
+| 🌡️ `climate` | room heating regulators (`heat-control`) | current and target temperature, heating level as preset |
+| 📈 `sensor` | room heating regulators | room temperature with history and statistics |
 
-At the beginning you need to install [HACS](https://hacs.xyz/) into your home assistant instance. All you need to know about instalation is on the web site.
+- Set up from the UI (config flow), no YAML.
+- Local polling every 5 s, no cloud.
+- Uses the [`pyinels`](https://github.com/JH-Soft-Technology/pyinels) library.
 
-When you have HACS installed, then open the HACS UI. Go into the integration section. In the top right corner are three dots. Click and select *Custom repositories*.
+**Planned:** weather stations, Lara radio.
 
-Copy URL of IneslForHass (https://github.com/JH-Soft-Technology/InelsForHass) repo into repository field and select category integration.
+---
 
-Search for InelsForHass. Then download it and configure.
+## 🧭 How it works
 
-## Issues
+```
+Home Assistant ──XML-RPC──▶ iNELS Connection Server ──▶ central unit (CU3) ──▶ BUS devices
+                 :8001
+```
 
-~~If~~ When you experience issues/bugs with this the best way to report them is to open an issue in **this** repo.
+The integration talks to the **iNELS Connection Server**, not to the central unit directly. It sees every device and variable that the Connection Server publishes from the iNELS IDM project (`export.pub`). Nothing has to be changed in the PLC.
 
-[Issue link](https://github.com/JH-Soft-Technology/InelsForHass/issues/)
+---
 
-[![buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/jhoralek)
+## 🚀 Installation
+
+### 1. Install via HACS
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JH-Soft-Technology&repository=InelsForHass&category=integration)
+
+Or manually: **HACS → ⋮ → Custom repositories** → `https://github.com/JH-Soft-Technology/InelsForHass`, type **Integration** → download **Inels over XMLRPC** → restart Home Assistant.
+
+<details><summary>Manual installation without HACS</summary>
+
+Copy `custom_components/inels_rpc` to `/config/custom_components/` and restart Home Assistant.
+</details>
+
+### 2. Add the integration
+
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=inels_rpc)
+
+**Settings → Devices & services → Add integration → Inels over XMLRPC** and fill in:
+
+| Field | Example | Note |
+|---|---|---|
+| Service url | `http://192.168.1.10` | address of the Connection Server, including `http://` |
+| Service port | `8001` | XML-RPC port of the Connection Server |
+| Central unit name | `CU3` | name of your central unit |
+
+---
+
+## 🌡️ Heating
+
+Every iNELS room regulator becomes a `climate` entity (HVAC mode `heat`) plus a room temperature `sensor`.
+
+| iNELS variable | Used for |
+|---|---|
+| `<room>_Temperature` | current temperature |
+| `<room>_StateTH` | target temperature (read-only) |
+| `<room>_StateM/U/N/K` | active heating level |
+| `<room>_VM/VU/VN/VK` | switching the heating level |
+
+**Presets = iNELS heating levels:**
+
+| Preset | iNELS level |
+|---|---|
+| `minimum` | Minimum |
+| `attenuation` | Attenuation (Útlum) |
+| `normal` | Normal |
+| `comfort` | Comfort |
+
+- The **target temperature cannot be set directly**. The central unit derives it from the active level, and the level temperatures are configured in iNELS IDM. Selecting a preset writes `<room>_V<level>=1`, and the change shows up within about 10 seconds.
+- **iNELS time programs keep running.** A preset selected from Home Assistant stays active only until the next program change.
+- Valves and heat demand are not published by the Connection Server, so they are not available.
+
+> [!TIP]
+> Every preset change is a write into the central unit. When you switch levels from automations, only write on an actual change and add hysteresis and a minimum interval.
+
+> [!NOTE]
+> If the regulator's level variables are not exported, the integration only reads temperatures.
+
+---
+
+## 🛠️ Troubleshooting
+
+- **Cannot connect:** check that the url includes `http://`, and that the Connection Server's XML-RPC port is reachable from Home Assistant.
+- **A device is missing:** the integration only sees what the Connection Server publishes. Check the device in `export.pub` (Connection Server administration → Configuration → CU config).
+- **Debug logging:**
+
+  ```yaml
+  logger:
+    logs:
+      custom_components.inels_rpc: debug
+      pyinels: debug
+  ```
+
+---
+
+## 🐞 Issues
+
+Found a bug or missing a device? [Open an issue](https://github.com/JH-Soft-Technology/InelsForHass/issues) and include the Home Assistant version, the integration version and the debug log.
+
+## 📄 License
+
+[MIT](LICENSE). iNELS is a trademark of ELKO EP, s.r.o. This project is not affiliated with or endorsed by ELKO EP.
+
+<p align="center">
+  <a href="https://www.buymeacoffee.com/jhoralek"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
+</p>

@@ -1,4 +1,5 @@
 """Switch platform for inels."""
+
 import logging
 
 from pyinels.device.pySwitch import pySwitch
@@ -62,12 +63,12 @@ class InelsSwitch(InelsEntity, SwitchEntity):
         """Turn on the switch."""
 
         await self.hass.async_add_executor_job(self.device.turn_on)
-        await self.coordinator.async_request_refresh()
+        self._set_pending(True)
 
     async def async_turn_off(self):
         """Turn off the switch."""
         await self.hass.async_add_executor_job(self.device.turn_off)
-        await self.coordinator.async_request_refresh()
+        self._set_pending(False)
 
     @property
     def name(self):
@@ -82,6 +83,9 @@ class InelsSwitch(InelsEntity, SwitchEntity):
     @property
     def is_on(self):
         """Return true if the switch is on."""
+        return self._value(self.device.state)
+
+    def _actual_value(self):
         return self.device.state
 
 

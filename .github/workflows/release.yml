@@ -1,0 +1,20 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  check-version:
+    name: Check manifest version matches tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VER=$(jq -r .version custom_components/inels_rpc/manifest.json)
+          echo "tag=$TAG manifest=$VER"
+          test "$TAG" = "$VER"
