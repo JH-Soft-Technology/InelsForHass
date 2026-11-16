@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/JH-Soft-Technology/InelsForHass/releases"><img src="https://img.shields.io/github/v/release/JH-Soft-Technology/InelsForHass?color=41BDF5" alt="Release"></a>
   <a href="https://hacs.xyz"><img src="https://img.shields.io/badge/HACS-Custom-41BDF5" alt="HACS"></a>
-  <img src="https://img.shields.io/badge/Home%20Assistant-2025.1%2B-41BDF5" alt="Home Assistant">
+  <img src="https://img.shields.io/badge/Home%20Assistant-2025.3%2B-41BDF5" alt="Home Assistant">
   <a href="https://github.com/JH-Soft-Technology/InelsForHass/actions/workflows/validate.yml"><img src="https://github.com/JH-Soft-Technology/InelsForHass/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/JH-Soft-Technology/InelsForHass" alt="License"></a>
 </p>
@@ -71,9 +71,23 @@ Copy `custom_components/inels_rpc` to `/config/custom_components/` and restart H
 
 | Field | Example | Note |
 |---|---|---|
-| Service url | `http://192.168.1.10` | address of the Connection Server, including `http://` |
-| Service port | `8001` | XML-RPC port of the Connection Server |
-| Central unit name | `CU3` | name of your central unit |
+| Host | `192.168.1.10` | IP address or host name of the Connection Server; `http://` is added automatically (a value with `http://` is accepted too) |
+| Port | `8001` | XML-RPC port of the Connection Server (default `8001`) |
+| Central unit | `CU3` | type of your central unit (default `CU3`) |
+
+The same Connection Server (host and port) can be added only once.
+
+### Changing the address
+
+When the Connection Server gets a new IP address or port, open **Settings → Devices & services → Inels over XMLRPC → ⋮ → Reconfigure**. The connection is checked before the change is saved; entities, entity IDs and history stay as they are.
+
+### Upgrading from 0.4.x
+
+- The existing entry is migrated automatically, nothing has to be set up again.
+- **Entity IDs do not change**, so automations, scripts and dashboards keep working.
+- The **displayed names** follow the Home Assistant naming rules now: the main entity of a device has the device name, the room temperature sensor is shown as `<regulator> Room temperature` (previously `<regulator> temperature`). Names you changed yourself are kept.
+- In the device registry the model shows the iNELS device type (`light`, `switch`, `door`, `shutter`, `heat-control`) and the manufacturer is ELKO EP.
+- Shutters no longer report a made-up position (the central unit does not know it), so the close button is not disabled after a restart.
 
 ---
 
@@ -109,9 +123,33 @@ Every iNELS room regulator becomes a `climate` entity (HVAC mode `heat`) plus a 
 
 ---
 
+## 🔄 Data updates and availability
+
+- The list of devices is loaded once when the integration starts. The values of all devices are then read every **5 seconds** in a single request.
+- Commands are sent one at a time. The commanded state is shown right away and kept until a poll confirms it (at most 6 s, 20 s for heating presets), so the entity does not flicker while the central unit applies the change.
+- If the Connection Server is not reachable when Home Assistant starts, the integration retries the setup automatically. If it stops answering later, all its entities become **unavailable** and recover on the first successful read; the outage is logged once.
+- A command that cannot be delivered shows an error in the UI (and fails the automation step) instead of being lost silently.
+
+### New and removed devices
+
+- **New devices** published by the Connection Server appear after reloading the integration (**⋮ → Reload**) or restarting Home Assistant.
+- Devices that the Connection Server no longer publishes are removed automatically on the next start or reload. A device can also be deleted manually from its device page when it is no longer published.
+
+---
+
+## ⚠️ Known limitations
+
+- Shutters support open, close and stop only; the position is not known.
+- The target temperature of the heating is read-only (see [Heating](#️-heating)).
+- The integration polls; changes made elsewhere (wall switches, iNELS apps) show up within 5 seconds.
+- Only devices of the types listed in [Features](#-features) are supported.
+
+---
+
 ## 🛠️ Troubleshooting
 
-- **Cannot connect:** check that the url includes `http://`, and that the Connection Server's XML-RPC port is reachable from Home Assistant.
+- **Cannot connect:** check the host and port, and that the Connection Server's XML-RPC port is reachable from Home Assistant.
+- **Diagnostics:** **Settings → Devices & services → Inels over XMLRPC → ⋮ → Download diagnostics** saves a file with the integration settings (without the server address), the list of devices (type, id, name, room) and their last values. Attach it to an issue.
 - **A device is missing:** the integration only sees what the Connection Server publishes. Check the device in `export.pub` (Connection Server administration → Configuration → CU config).
 - **Debug logging:**
 
@@ -121,6 +159,14 @@ Every iNELS room regulator becomes a `climate` entity (HVAC mode `heat`) plus a 
       custom_components.inels_rpc: debug
       pyinels: debug
   ```
+
+---
+
+## 🗑️ Removing the integration
+
+1. **Settings → Devices & services → Inels over XMLRPC → ⋮ → Delete.** This removes the entry with all its devices and entities. Nothing is changed in iNELS.
+2. If you installed it via HACS: **HACS → Inels over XMLRPC → ⋮ → Remove**. For a manual installation delete `/config/custom_components/inels_rpc`.
+3. Restart Home Assistant.
 
 ---
 
