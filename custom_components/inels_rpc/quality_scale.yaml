@@ -1,0 +1,94 @@
+rules:
+  # Bronze
+  action-setup:
+    status: exempt
+    comment: The integration does not register any service actions.
+  appropriate-polling: done
+  brands: done
+  common-modules: done
+  config-flow-test-coverage: done
+  config-flow: done
+  dependency-transparency:
+    status: todo
+    comment: pyinels is published on PyPI under MIT; the release is not built by a CI pipeline yet.
+  docs-actions:
+    status: exempt
+    comment: The integration does not register any service actions.
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  entity-event-setup:
+    status: exempt
+    comment: Entities only listen to the coordinator through CoordinatorEntity.
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup: done
+  unique-config-entry: done
+
+  # Silver
+  action-exceptions: done
+  config-entry-unloading: done
+  docs-configuration-parameters:
+    status: exempt
+    comment: The integration has no options flow.
+  docs-installation-parameters: done
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable: done
+  parallel-updates: done
+  reauthentication-flow:
+    status: exempt
+    comment: The Connection Server does not use authentication.
+  test-coverage: done
+
+  # Gold
+  devices: done
+  diagnostics: done
+  discovery-update-info:
+    status: exempt
+    comment: The Connection Server cannot be discovered.
+  discovery:
+    status: exempt
+    comment: The Connection Server does not announce itself (no zeroconf, SSDP or DHCP signature).
+  docs-data-update: done
+  docs-examples:
+    status: todo
+    comment: README has no automation examples yet.
+  docs-known-limitations: done
+  docs-supported-devices: done
+  docs-supported-functions: done
+  docs-troubleshooting: done
+  docs-use-cases:
+    status: todo
+    comment: README has no use case section yet.
+  dynamic-devices:
+    status: todo
+    comment: The device list is loaded on setup; new devices appear after reloading the integration (documented in README).
+  entity-category:
+    status: exempt
+    comment: All entities are primary entities, there are no configuration or diagnostic entities.
+  entity-device-class: done
+  entity-disabled-by-default:
+    status: exempt
+    comment: There are no noisy or rarely used entities.
+  entity-translations: done
+  exception-translations: done
+  icon-translations: done
+  reconfiguration-flow: done
+  repair-issues:
+    status: exempt
+    comment: There are no issues the user could fix with a repair flow.
+  stale-devices: done
+
+  # Platinum
+  async-dependency:
+    status: todo
+    comment: pyinels is synchronous (xmlrpc.client); an async version is a separate task in the library.
+  inject-websession:
+    status: todo
+    comment: Depends on the async version of pyinels.
+  strict-typing:
+    status: todo
+    comment: pyinels has no type hints yet.
