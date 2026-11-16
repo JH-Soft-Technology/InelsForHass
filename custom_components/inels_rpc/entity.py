@@ -48,6 +48,12 @@ class InelsEntity(CoordinatorEntity[InelsDataUpdateCoordinator]):
             "inels_id": device.unique_id,
         }
 
+    @property
+    def available(self) -> bool:
+        """Unavailable also when the device has no value."""
+        # pylint: disable-next=protected-access
+        return super().available and self.device._device.value is not None
+
     def _set_pending(self, value: Any, timeout: float = PENDING_TIMEOUT) -> None:
         """Remember the value written by a command and show it right away."""
         self._pending = value
@@ -73,9 +79,12 @@ class InelsEntity(CoordinatorEntity[InelsDataUpdateCoordinator]):
 
         Only a poll can confirm the value: pyinels stores the written value
         in the device right after the write, before the unit applies it."""
-        if self._pending is not None and self._actual_value() == self._pending:
+        if not self.available:
             self._pending = None
-        self._value(self._actual_value())
+        else:
+            if self._pending is not None and self._actual_value() == self._pending:
+                self._pending = None
+            self._value(self._actual_value())
         self.async_write_ha_state()
 
     async def _async_write(self, func: Callable[..., Any], *args: Any) -> None:

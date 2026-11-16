@@ -30,8 +30,7 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     async_add_entities(
         InelsShutter(coordinator, pyShutter(dev))
-        for dev in coordinator.devices
-        if dev.type == TYPE_SHUTTER
+        for dev in coordinator.devices_of_type(TYPE_SHUTTER)
     )
 
 

@@ -336,3 +336,31 @@ async def test_write_failed(
     assert err.value.translation_domain == "inels_rpc"
     assert err.value.translation_key == "write_failed"
     assert hass.states.get(entity_id).state == before.state
+
+
+async def test_device_without_value_skipped(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_api: MagicMock,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """A device whose variable is not published is skipped on setup."""
+    devices = mock_api.getAllDevices.return_value
+    next(dev for dev in devices if dev.id == "Light_1").set_value(None)
+    mock_config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert hass.states.get("light.kitchen") is None
+    assert hass.states.get("light.hall").state == STATE_ON
+    assert "Skipping Kitchen (Light_1)" in caplog.text
+
+
+async def test_device_loses_value(
+    hass: HomeAssistant, init_integration: MockConfigEntry
+) -> None:
+    """A device whose variable disappears becomes unavailable."""
+    _device(init_integration, "Socket_1").set_value(None)
+    await _refresh(hass, init_integration)
+    assert hass.states.get("switch.socket").state == "unavailable"
+    assert hass.states.get("light.kitchen").state == STATE_ON

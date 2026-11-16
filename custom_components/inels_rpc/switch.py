@@ -26,13 +26,11 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     entities: list[InelsSwitch] = [
         InelsSwitch(coordinator, pySwitch(dev))
-        for dev in coordinator.devices
-        if dev.type == TYPE_SWITCH
+        for dev in coordinator.devices_of_type(TYPE_SWITCH)
     ]
     entities.extend(
         InelsDoor(coordinator, pyDoor(dev))
-        for dev in coordinator.devices
-        if dev.type == TYPE_DOOR
+        for dev in coordinator.devices_of_type(TYPE_DOOR)
     )
     async_add_entities(entities)
 

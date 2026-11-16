@@ -27,7 +27,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the lights."""
     coordinator = entry.runtime_data
-    lights = [pyLight(dev) for dev in coordinator.devices if dev.type == TYPE_LIGHT]
+    lights = [pyLight(dev) for dev in coordinator.devices_of_type(TYPE_LIGHT)]
     async_add_entities(
         (
             InelsLightDimmable(coordinator, light)
