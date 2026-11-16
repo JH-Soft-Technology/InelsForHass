@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/JH-Soft-Technology/InelsForHass/releases"><img src="https://img.shields.io/github/v/release/JH-Soft-Technology/InelsForHass?color=1A9E8F" alt="Release"></a>
+  <a href="https://github.com/JH-Soft-Technology/InelsForHass/releases"><img src="https://img.shields.io/github/v/release/JH-Soft-Technology/InelsForHass?color=41BDF5" alt="Release"></a>
   <a href="https://hacs.xyz"><img src="https://img.shields.io/badge/HACS-Custom-41BDF5" alt="HACS"></a>
   <img src="https://img.shields.io/badge/Home%20Assistant-2025.1%2B-41BDF5" alt="Home Assistant">
   <a href="https://github.com/JH-Soft-Technology/InelsForHass/actions/workflows/validate.yml"><img src="https://github.com/JH-Soft-Technology/InelsForHass/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
