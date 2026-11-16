@@ -2,7 +2,7 @@
 
 DOMAIN = "inels_rpc"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.3.6"
+VERSION = "0.4.0"
 
 ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/Issues"
 
@@ -26,13 +26,26 @@ ICON_LIGHT = "mdi:lightbulb"
 ICON_DOOR = "mdi:gate"
 ICON_SHUTTER_CLOSED = "mdi:window-shutter"
 ICON_SHUTTER_OPENED = "mdi:window-shutter-open"
+ICON_THERM = "mdi:radiator"
 
 PLATFORM_SWITCH = "switch"
 PLATFORM_LIGHT = "light"
 PLATFORM_COVER = "cover"
 PLATFORM_DOOR = "door"
+PLATFORM_CLIMATE = "climate"
+PLATFORM_SENSOR = "sensor"
+PLATFORM_THERM = "therm"
 
-PLATFORMS = [PLATFORM_SWITCH, PLATFORM_LIGHT, PLATFORM_COVER]
+PLATFORMS = [
+    PLATFORM_SWITCH,
+    PLATFORM_LIGHT,
+    PLATFORM_COVER,
+    PLATFORM_CLIMATE,
+    PLATFORM_SENSOR,
+]
+
+# translation key of the heat control entities
+TRANSLATION_HEAT_CONTROL = "heat_control"
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
