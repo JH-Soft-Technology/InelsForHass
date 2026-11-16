@@ -1,4 +1,5 @@
 """Switch platform for inels."""
+
 import logging
 
 from pyinels.device.pySwitch import pySwitch
