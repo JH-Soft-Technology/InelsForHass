@@ -15,7 +15,7 @@
                     "port": "Szerver port",
                     "unit": "CU név"
                 },
-                "description": "A beállításhoz való segítségért kattints erre a linkre: https://github.com/JH-Soft-Technology/InelsForHass",
+                "description": "A beállításhoz való segítségért kattints erre a linkre: {docs_url}",
                 "title": "iNels"
             }
         }

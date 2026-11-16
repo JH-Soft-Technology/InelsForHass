@@ -15,7 +15,7 @@
                     "port": "Service port",
                     "unit": "Central unit name"
                 },
-                "description": "If you need help with the configuration have a look here: https://github.com/JH-Soft-Technology/InelsForHass",
+                "description": "If you need help with the configuration have a look here: {docs_url}",
                 "title": "iNels"
             }
         }
