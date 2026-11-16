@@ -1,4 +1,5 @@
 """Shutter platform for inels."""
+
 import logging
 
 from pyinels.device.pyShutter import pyShutter
@@ -6,7 +7,7 @@ from pyinels.pyTimer import TimerError
 
 from homeassistant.components.cover import CoverEntity
 
-from homeassistant.const import (
+from pyinels.const import (
     STATE_CLOSED,
     STATE_OPEN,
     STATE_CLOSING,
@@ -102,13 +103,15 @@ class InelsShutter(InelsEntity, CoverEntity):
         result = (
             STATE_OPENING
             if S.is_opening
-            else STATE_CLOSING
-            if S.is_closing
-            else STATE_CLOSED
-            if S.is_closed
-            else STATE_OPEN
-            if S.device.state == STATE_OPEN
-            else STATE_CLOSED
+            else (
+                STATE_CLOSING
+                if S.is_closing
+                else (
+                    STATE_CLOSED
+                    if S.is_closed
+                    else STATE_OPEN if S.device.state == STATE_OPEN else STATE_CLOSED
+                )
+            )
         )
 
         return result

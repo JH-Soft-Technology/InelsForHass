@@ -90,12 +90,15 @@ class InelsClimate(InelsEntity, ClimateEntity):
     @property
     def preset_mode(self):
         """Return the active level."""
+        return self._value(self.device.level)
+
+    def _actual_value(self):
         return self.device.level
 
     async def async_set_preset_mode(self, preset_mode):
         """Select the level of the heat control."""
         await self.hass.async_add_executor_job(self.device.set_level, preset_mode)
-        await self.coordinator.async_request_refresh()
+        self._set_pending(preset_mode, timeout=20)
 
     async def async_set_hvac_mode(self, hvac_mode):
         """Heat control supports the heat mode only."""
