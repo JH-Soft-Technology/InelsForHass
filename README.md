@@ -18,6 +18,16 @@ InelsForHass gives you a chance to control your proprietary Inels devieces throu
 - [ ] Weather stations
 - [ ] Lara radio
 
+## HowTo
+
+At the beginning you need to install [HACS](https://hacs.xyz/) into your home assistant instance. All you need to know about instalation is on the web site.
+
+When you have HACS installed, then open the HACS UI. Go into the integration section. In the top right corner are three dots. Click and select *Custom repositories*.
+
+Copy URL of IneslForHass (https://github.com/JH-Soft-Technology/InelsForHass) repo into repository field and select category integration.
+
+Search for InelsForHass. Then download it and configure.
+
 ## Issues
 
 ~~If~~ When you experience issues/bugs with this the best way to report them is to open an issue in **this** repo.

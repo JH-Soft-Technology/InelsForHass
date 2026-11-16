@@ -15,8 +15,24 @@
                     "port": "Port služby",
                     "unit": "Typ jednotky"
                 },
-                "description": "Pokud si nevíte rady, tak navštivte: https://github.com/JH-Soft-Technology/InelsForHass",
+                "description": "Pokud si nevíte rady, tak navštivte: {docs_url}",
                 "title": "iNels"
+            }
+        }
+    },
+    "entity": {
+        "climate": {
+            "heat_control": {
+                "state_attributes": {
+                    "preset_mode": {
+                        "state": {
+                            "minimum": "Minimum",
+                            "attenuation": "Útlum",
+                            "normal": "Normál",
+                            "comfort": "Komfort"
+                        }
+                    }
+                }
             }
         }
     }
