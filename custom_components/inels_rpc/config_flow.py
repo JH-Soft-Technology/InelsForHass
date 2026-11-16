@@ -38,6 +38,10 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     }
 )
 
+DESCRIPTION_PLACEHOLDERS = {
+    "docs_url": "https://github.com/JH-Soft-Technology/InelsForHass"
+}
+
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect."""
@@ -66,7 +70,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         if user_input is None:
             return self.async_show_form(
-                step_id=USER_STR, data_schema=STEP_USER_DATA_SCHEMA
+                step_id=USER_STR,
+                data_schema=STEP_USER_DATA_SCHEMA,
+                description_placeholders=DESCRIPTION_PLACEHOLDERS,
             )
 
         errors = {}
@@ -84,7 +90,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_create_entry(title=info[TITLE_STR], data=user_input)
 
         return self.async_show_form(
-            step_id=USER_STR, data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+            step_id=USER_STR,
+            data_schema=STEP_USER_DATA_SCHEMA,
+            errors=errors,
+            description_placeholders=DESCRIPTION_PLACEHOLDERS,
         )
 
 
