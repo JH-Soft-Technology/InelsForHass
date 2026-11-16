@@ -76,15 +76,13 @@ class InelsLightBase(InelsEntity, LightEntity):
         """Turn on the light."""
         await self.hass.async_add_executor_job(self._light.turn_on)
         self._state = True
-
-        await self._coordinator.async_request_refresh()
+        self._set_pending(True)
 
     async def async_turn_off(self, **kwargs):  # pylint: disable=unused-argument
         """Turn off the light."""
         await self.hass.async_add_executor_job(self._light.turn_off)
         self._state = False
-
-        await self._coordinator.async_request_refresh()
+        self._set_pending(False)
 
     @property
     def color_mode(self):
@@ -109,6 +107,9 @@ class InelsLightBase(InelsEntity, LightEntity):
     @property
     def is_on(self):
         """Return true if the light is on."""
+        return self._value(self._light.state)
+
+    def _actual_value(self):
         return self._light.state
 
     def update(self):
@@ -140,9 +141,23 @@ class InelsLightDimmable(InelsLightBase, LightEntity):
     @property
     def brightness(self):
         """Return the brightness of the light."""
-        self._brightness = self._light.brightness()
+        self._brightness = self._value(self._light.brightness())
 
         return int(self._brightness * 2.55)
+
+    @property
+    def is_on(self):
+        """Return true if the light is on."""
+        return self._value(self._light.brightness()) > MIN_BRIGHTNESS
+
+    def _actual_value(self):
+        return self._light.brightness()
+
+    async def async_turn_off(self, **kwargs):  # pylint: disable=unused-argument
+        """Turn off the light."""
+        await self.hass.async_add_executor_job(self._light.turn_off)
+        self._state = False
+        self._set_pending(MIN_BRIGHTNESS)
 
     @property
     def color_mode(self):
@@ -170,4 +185,4 @@ class InelsLightDimmable(InelsLightBase, LightEntity):
             self._brightness = MAX_BRIGHTNESS
             self._state = True
 
-        await self._coordinator.async_request_refresh()
+        self._set_pending(self._brightness)
