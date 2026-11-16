@@ -1,58 +1,48 @@
-"""Constants for the inels integration."""
+"""Constants for the iNELS integration."""
+
+from datetime import timedelta
+from xmlrpc.client import Error as XmlRpcError
+
+from homeassistant.const import Platform
+from pyinels.exception import ApiException
 
 DOMAIN = "inels_rpc"
-DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.4.3"
-
-ISSUE_URL = "https://github.com/JH-Soft-Technology/InelsForHass/issues"
+VERSION = "0.5.0"
 
 TITLE = "iNELS"
-HOST_STR = "host"
-PORT_STR = "port"
-UNIT_STR = "unit"
-USER_STR = "user"
-TITLE_STR = "title"
+MANUFACTURER = "ELKO EP"
 
-CLASS_SHUTTER = "shutter"
+CONF_UNIT = "unit"
 
-ERROR_BASE = "base"
-ERROR_BASE_CANNOT_CONNECT = "cannot_connect"
-ERROR_BASE_INVALID_AUTH = "invalid_auth"
-ERROR_BASE_UNKNOWN = "unknown"
+DEFAULT_PORT = 8001
+DEFAULT_UNIT = "CU3"
 
-# Icons
-ICON_SWITCH = "mdi:power-socket"
-ICON_LIGHT = "mdi:lightbulb"
-ICON_DOOR = "mdi:gate"
-ICON_SHUTTER_CLOSED = "mdi:window-shutter"
-ICON_SHUTTER_OPENED = "mdi:window-shutter-open"
-ICON_THERM = "mdi:radiator"
+UPDATE_INTERVAL = timedelta(seconds=5)
 
-PLATFORM_SWITCH = "switch"
-PLATFORM_LIGHT = "light"
-PLATFORM_COVER = "cover"
-PLATFORM_DOOR = "door"
-PLATFORM_CLIMATE = "climate"
-PLATFORM_SENSOR = "sensor"
-PLATFORM_THERM = "therm"
+# Errors raised by pyinels and the underlying XML-RPC client when the
+# Connection Server cannot be reached or returns unexpected data.
+PYINELS_ERRORS = (ApiException, OSError, XmlRpcError, KeyError, ValueError)
+
+# Device types as recognised by pyinels
+TYPE_LIGHT = "light"
+TYPE_SWITCH = "switch"
+TYPE_DOOR = "door"
+TYPE_SHUTTER = "shutter"
+TYPE_THERM = "therm"
+
+# Model shown in the device registry for every pyinels device type
+DEVICE_MODELS = {
+    TYPE_LIGHT: "light",
+    TYPE_SWITCH: "switch",
+    TYPE_DOOR: "door",
+    TYPE_SHUTTER: "shutter",
+    TYPE_THERM: "heat-control",
+}
 
 PLATFORMS = [
-    PLATFORM_SWITCH,
-    PLATFORM_LIGHT,
-    PLATFORM_COVER,
-    PLATFORM_CLIMATE,
-    PLATFORM_SENSOR,
+    Platform.CLIMATE,
+    Platform.COVER,
+    Platform.LIGHT,
+    Platform.SENSOR,
+    Platform.SWITCH,
 ]
-
-# translation key of the heat control entities
-TRANSLATION_HEAT_CONTROL = "heat_control"
-
-STARTUP_MESSAGE = f"""
--------------------------------------------------------------------
-{TITLE}
-Version: {VERSION}
-This is a custom integration!
-If you have any issues with this you need to open an issue here:
-{ISSUE_URL}
--------------------------------------------------------------------
-"""
