@@ -1,4 +1,5 @@
 """InelsEntity class"""
+
 from homeassistant.helpers import entity
 
 from .const import DOMAIN, VERSION, TITLE
@@ -32,11 +33,11 @@ class InelsEntity(entity.Entity):
             "model": type(self).__name__,
             "manufacturer": TITLE,
             "sw_version": VERSION,
-            "suggested_area": self.device.group
+            "suggested_area": self.device.group,
         }
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the state attributes."""
         return {
             "inels_type": type(self.device).__name__,
