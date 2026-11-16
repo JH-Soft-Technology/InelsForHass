@@ -1,98 +1,68 @@
-"""Switch platform for inels."""
+"""Switch platform of the iNELS integration."""
 
-import logging
+from __future__ import annotations
 
-from pyinels.device.pySwitch import pySwitch
-from pyinels.device.pyDoor import pyDoor
+from typing import Any
 
-from custom_components.inels_rpc.entity import InelsEntity
 from homeassistant.components.switch import SwitchEntity
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from pyinels.device.pyDoor import pyDoor
+from pyinels.device.pySwitch import pySwitch
 
-from custom_components.inels_rpc.const import (
-    DOMAIN,
-    DOMAIN_DATA,
-    ICON_SWITCH,
-    PLATFORM_SWITCH,
-    PLATFORM_DOOR,
-    ICON_DOOR,
-)
+from . import InelsConfigEntry
+from .const import TYPE_DOOR, TYPE_SWITCH
+from .entity import InelsEntity
 
-_LOGGER = logging.getLogger(__name__)
+PARALLEL_UPDATES = 1
 
 
-async def async_setup_entry(hass, entry, async_add_devices):
-    """Setup switch platform."""
-
-    _LOGGER.info("Setting up switches")
-
-    entities = hass.data[DOMAIN][DOMAIN_DATA]
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-
-    devices = [
-        dev
-        for dev in entities
-        if dev.type == PLATFORM_SWITCH or dev.type == PLATFORM_DOOR
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: InelsConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
+) -> None:
+    """Set up the switches and the gates."""
+    coordinator = entry.runtime_data
+    entities: list[InelsSwitch] = [
+        InelsSwitch(coordinator, pySwitch(dev))
+        for dev in coordinator.devices
+        if dev.type == TYPE_SWITCH
     ]
-
-    switches = [
-        await hass.async_add_executor_job(pySwitch, dev)
-        for dev in devices
-        if dev.type == PLATFORM_SWITCH
-    ]
-    doors = [
-        await hass.async_add_executor_job(pyDoor, dev)
-        for dev in devices
-        if dev.type == PLATFORM_DOOR
-    ]
-
-    await coordinator.async_refresh()
-
-    if len(switches) > 0:
-        async_add_devices(
-            [InelsSwitch(coordinator, switch) for switch in switches], True
-        )
-
-    if len(doors) > 0:
-        async_add_devices([InelsDoor(coordinator, door) for door in doors], True)
+    entities.extend(
+        InelsDoor(coordinator, pyDoor(dev))
+        for dev in coordinator.devices
+        if dev.type == TYPE_DOOR
+    )
+    async_add_entities(entities)
 
 
 class InelsSwitch(InelsEntity, SwitchEntity):
-    """Inels switch class."""
+    """Relay or socket."""
 
-    async def async_turn_on(self):
-        """Turn on the switch."""
-
-        await self.hass.async_add_executor_job(self.device.turn_on)
-        self._set_pending(True)
-
-    async def async_turn_off(self):
-        """Turn off the switch."""
-        await self.hass.async_add_executor_job(self.device.turn_off)
-        self._set_pending(False)
+    _attr_name = None
+    _attr_translation_key = "switch"
 
     @property
-    def name(self):
-        """Return the name of the switch."""
-        return self.device.name
-
-    @property
-    def icon(self):
-        """Return the icon of this switch."""
-        return ICON_SWITCH
-
-    @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if the switch is on."""
         return self._value(self.device.state)
 
-    def _actual_value(self):
+    def _actual_value(self) -> Any:
         return self.device.state
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn on the switch."""
+        await self._async_write(self.device.turn_on)
+        self._set_pending(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn off the switch."""
+        await self._async_write(self.device.turn_off)
+        self._set_pending(False)
 
 
 class InelsDoor(InelsSwitch):
-    """Inels door class implements InelsSwitch."""
+    """Gate or garage door controlled by a pulse."""
 
-    @property
-    def icon(self):
-        """Return the icon of this door."""
-        return ICON_DOOR
+    _attr_translation_key = "door"
