@@ -27,9 +27,22 @@ InelsForHass gives you a chance to control your proprietary Inels devieces throu
 - [x] Switches
 - [x] Shades
 - [x] Garage doors
-- [ ] Heating
+- [x] Heating (room controllers as `climate` entities + room temperature `sensor`)
 - [ ] Weather stations
 - [ ] Lara radio
+
+### Heating
+
+Every iNELS `heat-control` room regulator is exposed as a `climate` entity (HVAC mode `heat`) together with a room temperature `sensor`.
+
+- The current temperature is read from `<room>_Temperature`.
+- The **preset** selects the active iNELS level: `minimum`, `attenuation` (Útlum), `normal`, `comfort`. Selecting a preset writes `<room>_V<level>=1`.
+- The target temperature is shown read-only. iNELS calculates it from the active level, so it cannot be set directly. The temperatures of the levels are configured in iNELS IDM.
+- Valves and heat demand are not published by the Connection Server and are therefore not available.
+
+> **Note:** the iNELS time programs keep switching levels automatically, so a preset selected from Home Assistant is overridden at the next program change. Every preset change is a write into the central unit — use automations with hysteresis and a sensible minimum interval.
+
+The room variables (`*_Temperature`, `*_StateTH`, `*_State*`, `*_V*`) must be exported from IDM (`export.pub`); nothing needs to be changed in the PLC.
 
 ### Issues
 
