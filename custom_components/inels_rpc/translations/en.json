@@ -19,5 +19,21 @@
                 "title": "iNels"
             }
         }
+    },
+    "entity": {
+        "climate": {
+            "heat_control": {
+                "state_attributes": {
+                    "preset_mode": {
+                        "state": {
+                            "minimum": "Minimum",
+                            "attenuation": "Attenuation",
+                            "normal": "Normal",
+                            "comfort": "Comfort"
+                        }
+                    }
+                }
+            }
+        }
     }
 }
