@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/JH-Soft-Technology/InelsForHass/releases"><img src="https://img.shields.io/github/v/release/JH-Soft-Technology/InelsForHass?color=41BDF5" alt="Release"></a>
   <a href="https://hacs.xyz"><img src="https://img.shields.io/badge/HACS-Custom-41BDF5" alt="HACS"></a>
-  <img src="https://img.shields.io/badge/Home%20Assistant-2025.1%2B-41BDF5" alt="Home Assistant">
+  <img src="https://img.shields.io/badge/Home%20Assistant-2025.3%2B-41BDF5" alt="Home Assistant">
   <a href="https://github.com/JH-Soft-Technology/InelsForHass/actions/workflows/validate.yml"><img src="https://github.com/JH-Soft-Technology/InelsForHass/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/JH-Soft-Technology/InelsForHass" alt="Licence"></a>
 </p>
@@ -71,9 +71,23 @@ Zkopírujte `custom_components/inels_rpc` do `/config/custom_components/` a rest
 
 | Pole | Příklad | Poznámka |
 |---|---|---|
-| URL | `http://192.168.1.10` | adresa Connection Serveru včetně `http://` |
-| Port služby | `8001` | XML-RPC port Connection Serveru |
-| Typ jednotky | `CU3` | název centrální jednotky |
+| Adresa | `192.168.1.10` | IP adresa nebo název Connection Serveru; `http://` se doplní automaticky (hodnota s `http://` se přijme také) |
+| Port | `8001` | XML-RPC port Connection Serveru (výchozí `8001`) |
+| Centrální jednotka | `CU3` | typ centrální jednotky (výchozí `CU3`) |
+
+Stejný Connection Server (adresa a port) lze přidat jen jednou.
+
+### Změna adresy
+
+Když Connection Server dostane novou IP adresu nebo port, otevřete **Nastavení → Zařízení a služby → Inels over XMLRPC → ⋮ → Změnit nastavení**. Před uložením se ověří spojení; entity, jejich ID i historie zůstanou zachované.
+
+### Přechod z verze 0.4.x
+
+- Stávající položka se převede automaticky, nic není potřeba nastavovat znovu.
+- **ID entit se nemění**, automatizace, skripty i nástěnky fungují dál.
+- **Zobrazované názvy** se nově řídí pravidly Home Assistantu: hlavní entita zařízení má název zařízení, senzor teploty se zobrazuje jako `<regulátor> Teplota v místnosti` (dříve `<regulátor> temperature`). Názvy, které jste si sami změnili, zůstanou.
+- V registru zařízení je jako model uveden typ zařízení iNELS (`light`, `switch`, `door`, `shutter`, `heat-control`) a výrobce ELKO EP.
+- Rolety už nehlásí vymyšlenou polohu (centrální jednotka ji nezná), takže po restartu není zablokované tlačítko Zavřít.
 
 ---
 
@@ -109,9 +123,35 @@ Každý regulátor místnosti v iNELS se v HA objeví jako entita `climate` (re�
 
 ---
 
+## 🔄 Aktualizace dat a nedostupnost
+
+- Seznam zařízení se načte jednou při startu integrace. Hodnoty všech zařízení se pak čtou každých **5 sekund** jedním požadavkem.
+- Příkazy se odesílají postupně, jeden po druhém. Odeslaný stav se zobrazí hned a drží se, dokud ho nepotvrdí čtení z jednotky (nejvýš 6 s, u presetů topení 20 s), takže entita neproblikává, než centrální jednotka změnu provede.
+- Každé volání Connection Serveru má časový limit 10 sekund, zaseknutý server tak nezablokuje Home Assistant.
+- Zařízení, jehož proměnnou Connection Server nepublikuje, se přeskočí (s varováním v logu) a nerozbije celou platformu.
+- Když Connection Server při startu Home Assistantu neodpovídá, integrace se zkouší nastavit znovu automaticky. Když přestane odpovídat později, všechny její entity přejdou do stavu **nedostupné** a vrátí se po prvním úspěšném čtení; výpadek se zaloguje jednou.
+- Příkaz, který se nepodaří doručit, zobrazí v UI chybu (a zastaví krok automatizace), místo aby se tiše ztratil.
+
+### Nová a odebraná zařízení
+
+- **Nová zařízení** publikovaná Connection Serverem se objeví po znovunačtení integrace (**⋮ → Znovu načíst**) nebo po restartu Home Assistantu.
+- Zařízení, která Connection Server už nepublikuje, se při dalším startu nebo znovunačtení automaticky odeberou. Takové zařízení jde smazat i ručně na jeho stránce.
+
+---
+
+## ⚠️ Známá omezení
+
+- Rolety umí jen otevřít, zavřít a zastavit; poloha není známa.
+- Žádaná teplota topení je jen pro čtení (viz [Vytápění](#️-vytápění)).
+- Integrace se dotazuje periodicky; změny provedené jinde (vypínače, aplikace iNELS) se projeví do 5 sekund.
+- Podporovány jsou jen typy zařízení uvedené v sekci [Co umí](#-co-umí).
+
+---
+
 ## 🛠️ Řešení potíží
 
-- **Nepovedlo se připojit:** zkontrolujte, že URL obsahuje `http://` a že je XML-RPC port Connection Serveru z Home Assistantu dostupný.
+- **Nepovedlo se připojit:** zkontrolujte adresu a port a že je XML-RPC port Connection Serveru z Home Assistantu dostupný.
+- **Diagnostika:** **Nastavení → Zařízení a služby → Inels over XMLRPC → ⋮ → Stáhnout diagnostiku** uloží soubor s nastavením integrace (bez adresy serveru), seznamem zařízení (typ, id, název, místnost) a jejich posledními hodnotami. Přiložte ho k issue.
 - **Chybí zařízení:** integrace vidí jen to, co Connection Server publikuje. Zkontrolujte zařízení v `export.pub` (administrace Connection Serveru → Configuration → CU config).
 - **Ladicí log:**
 
@@ -121,6 +161,14 @@ Každý regulátor místnosti v iNELS se v HA objeví jako entita `climate` (re�
       custom_components.inels_rpc: debug
       pyinels: debug
   ```
+
+---
+
+## 🗑️ Odebrání integrace
+
+1. **Nastavení → Zařízení a služby → Inels over XMLRPC → ⋮ → Smazat.** Tím se odebere položka se všemi zařízeními a entitami. V iNELS se nic nemění.
+2. Pokud jste instalovali přes HACS: **HACS → Inels over XMLRPC → ⋮ → Odebrat**. U ruční instalace smažte `/config/custom_components/inels_rpc`.
+3. Restartujte Home Assistant.
 
 ---
 

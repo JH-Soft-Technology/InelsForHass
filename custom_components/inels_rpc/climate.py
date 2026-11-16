@@ -1,8 +1,8 @@
-"""Climate platform for inels."""
+"""Climate platform of the iNELS integration."""
 
-import logging
+from __future__ import annotations
 
-from pyinels.device.pyTherm import pyTherm
+from typing import Any
 
 from homeassistant.components.climate import (
     ClimateEntity,
@@ -10,95 +10,82 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.const import UnitOfTemperature
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from pyinels.device.pyTherm import pyTherm
 
-from custom_components.inels_rpc.entity import InelsEntity
-from custom_components.inels_rpc.const import (
-    DOMAIN,
-    DOMAIN_DATA,
-    ICON_THERM,
-    PLATFORM_THERM,
-    TRANSLATION_HEAT_CONTROL,
-)
+from . import InelsConfigEntry
+from .const import TYPE_THERM
+from .entity import InelsEntity
 
-_LOGGER = logging.getLogger(__name__)
+PARALLEL_UPDATES = 1
+
+# The central unit switches the level with a delay of several seconds.
+LEVEL_PENDING_TIMEOUT = 20
 
 
-async def async_setup_entry(hass, entry, async_add_devices):
-    """Setup climate platform."""
-
-    _LOGGER.info("Setting up heat controls")
-
-    devices = hass.data[DOMAIN][DOMAIN_DATA]
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-
-    therms = [
-        await hass.async_add_executor_job(pyTherm, dev)
-        for dev in devices
-        if dev.type == PLATFORM_THERM
-    ]
-
-    await coordinator.async_refresh()
-
-    if len(therms) > 0:
-        async_add_devices([InelsClimate(coordinator, therm) for therm in therms], True)
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: InelsConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
+) -> None:
+    """Set up the heat controls."""
+    coordinator = entry.runtime_data
+    async_add_entities(
+        InelsClimate(coordinator, pyTherm(dev))
+        for dev in coordinator.devices_of_type(TYPE_THERM)
+    )
 
 
 class InelsClimate(InelsEntity, ClimateEntity):
-    """Inels heat control class.
+    """Heat control of a room.
 
     The set point is computed by the central unit from the active level,
     so the heating is controlled by the preset mode (level) only."""
 
+    _attr_name = None
+    _attr_translation_key = "heat_control"
     _attr_hvac_modes = [HVACMode.HEAT]
     _attr_hvac_mode = HVACMode.HEAT
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_target_temperature_step = 0.5
-    _attr_translation_key = TRANSLATION_HEAT_CONTROL
+
+    device: pyTherm
 
     @property
-    def name(self):
-        """Return the name of the heat control."""
-        return self.device.name
-
-    @property
-    def icon(self):
-        """Return the icon of the heat control."""
-        return ICON_THERM
-
-    @property
-    def supported_features(self):
+    def supported_features(self) -> ClimateEntityFeature:
         """Levels can be selected only when they are exported."""
         if self.device.levels:
             return ClimateEntityFeature.PRESET_MODE
         return ClimateEntityFeature(0)
 
     @property
-    def current_temperature(self):
+    def current_temperature(self) -> float | None:
         """Return the measured temperature."""
         return self.device.current_temperature
 
     @property
-    def target_temperature(self):
+    def target_temperature(self) -> float | None:
         """Return the set point."""
         return self.device.target_temperature
 
     @property
-    def preset_modes(self):
+    def preset_modes(self) -> list[str] | None:
         """Return the levels of the heat control."""
         return self.device.levels or None
 
     @property
-    def preset_mode(self):
+    def preset_mode(self) -> str | None:
         """Return the active level."""
         return self._value(self.device.level)
 
-    def _actual_value(self):
+    def _actual_value(self) -> Any:
         return self.device.level
 
-    async def async_set_preset_mode(self, preset_mode):
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Select the level of the heat control."""
-        await self.hass.async_add_executor_job(self.device.set_level, preset_mode)
-        self._set_pending(preset_mode, timeout=20)
+        await self._async_write(self.device.set_level, preset_mode)
+        self._set_pending(preset_mode, timeout=LEVEL_PENDING_TIMEOUT)
 
-    async def async_set_hvac_mode(self, hvac_mode):
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Heat control supports the heat mode only."""

@@ -1,22 +1,39 @@
 {
     "config": {
         "abort": {
-            "already_configured": "Zařízení je již nastaveno."
+            "already_configured": "Tento Connection Server je již nastaven",
+            "reconfigure_successful": "Změna nastavení proběhla úspěšně"
         },
         "error": {
             "cannot_connect": "Nepovedlo se připojit",
-            "invalid_auth": "Nesprávné ověření",
-            "unknown": "Neočekávaná vyjímka"
+            "unknown": "Neočekávaná chyba"
         },
         "step": {
             "user": {
                 "data": {
-                    "host": "URL",
-                    "port": "Port služby",
-                    "unit": "Typ jednotky"
+                    "host": "Adresa",
+                    "port": "Port",
+                    "unit": "Centrální jednotka"
                 },
-                "description": "Pokud si nevíte rady, tak navštivte: {docs_url}",
-                "title": "iNels"
+                "data_description": {
+                    "host": "IP adresa nebo název iNELS Connection Serveru, např. 192.168.1.10. http:// se doplní automaticky.",
+                    "port": "XML-RPC port Connection Serveru, výchozí je 8001.",
+                    "unit": "Typ centrální jednotky iNELS, např. CU3."
+                },
+                "description": "Pokud si nevíte rady, navštivte: {docs_url}",
+                "title": "iNELS Connection Server"
+            },
+            "reconfigure": {
+                "data": {
+                    "host": "Adresa",
+                    "port": "Port"
+                },
+                "data_description": {
+                    "host": "IP adresa nebo název iNELS Connection Serveru, např. 192.168.1.10. http:// se doplní automaticky.",
+                    "port": "XML-RPC port Connection Serveru, výchozí je 8001."
+                },
+                "description": "Změna adresy Connection Serveru. Více informací: {docs_url}",
+                "title": "iNELS Connection Server"
             }
         }
     },
@@ -34,6 +51,22 @@
                     }
                 }
             }
+        },
+        "sensor": {
+            "room_temperature": {
+                "name": "Teplota v místnosti"
+            }
+        }
+    },
+    "exceptions": {
+        "cannot_connect": {
+            "message": "Nepodařilo se načíst zařízení z iNELS Connection Serveru: {error}"
+        },
+        "update_failed": {
+            "message": "Nepodařilo se přečíst hodnoty z iNELS Connection Serveru: {error}"
+        },
+        "write_failed": {
+            "message": "Nepodařilo se odeslat příkaz do {name}: {error}"
         }
     }
 }
