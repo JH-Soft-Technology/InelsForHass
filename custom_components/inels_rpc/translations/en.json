@@ -1,22 +1,39 @@
 {
     "config": {
         "abort": {
-            "already_configured": "Device is already configured"
+            "already_configured": "This Connection Server is already configured",
+            "reconfigure_successful": "Re-configuration was successful"
         },
         "error": {
             "cannot_connect": "Failed to connect",
-            "invalid_auth": "Invalid authentication",
             "unknown": "Unexpected error"
         },
         "step": {
             "user": {
                 "data": {
-                    "host": "Service url",
-                    "port": "Service port",
-                    "unit": "Central unit name"
+                    "host": "Host",
+                    "port": "Port",
+                    "unit": "Central unit"
+                },
+                "data_description": {
+                    "host": "IP address or host name of the iNELS Connection Server, e.g. 192.168.1.10. http:// is added automatically.",
+                    "port": "XML-RPC port of the Connection Server, 8001 by default.",
+                    "unit": "Type of the iNELS central unit, e.g. CU3."
                 },
                 "description": "If you need help with the configuration have a look here: {docs_url}",
-                "title": "iNels"
+                "title": "iNELS Connection Server"
+            },
+            "reconfigure": {
+                "data": {
+                    "host": "Host",
+                    "port": "Port"
+                },
+                "data_description": {
+                    "host": "IP address or host name of the iNELS Connection Server, e.g. 192.168.1.10. http:// is added automatically.",
+                    "port": "XML-RPC port of the Connection Server, 8001 by default."
+                },
+                "description": "Change the address of the Connection Server. More information: {docs_url}",
+                "title": "iNELS Connection Server"
             }
         }
     },
@@ -34,6 +51,22 @@
                     }
                 }
             }
+        },
+        "sensor": {
+            "room_temperature": {
+                "name": "Room temperature"
+            }
+        }
+    },
+    "exceptions": {
+        "cannot_connect": {
+            "message": "Cannot load the devices from the iNELS Connection Server: {error}"
+        },
+        "update_failed": {
+            "message": "Cannot read the values from the iNELS Connection Server: {error}"
+        },
+        "write_failed": {
+            "message": "Cannot send the command to {name}: {error}"
         }
     }
 }
