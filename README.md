@@ -127,6 +127,8 @@ Every iNELS room regulator becomes a `climate` entity (HVAC mode `heat`) plus a 
 
 - The list of devices is loaded once when the integration starts. The values of all devices are then read every **5 seconds** in a single request.
 - Commands are sent one at a time. The commanded state is shown right away and kept until a poll confirms it (at most 6 s, 20 s for heating presets), so the entity does not flicker while the central unit applies the change.
+- Every call to the Connection Server times out after 10 seconds, so a hanging server cannot block Home Assistant.
+- A device whose variable the Connection Server does not publish is skipped (a warning is logged) instead of breaking the whole platform.
 - If the Connection Server is not reachable when Home Assistant starts, the integration retries the setup automatically. If it stops answering later, all its entities become **unavailable** and recover on the first successful read; the outage is logged once.
 - A command that cannot be delivered shows an error in the UI (and fails the automation step) instead of being lost silently.
 

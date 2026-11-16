@@ -33,8 +33,7 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     async_add_entities(
         InelsClimate(coordinator, pyTherm(dev))
-        for dev in coordinator.devices
-        if dev.type == TYPE_THERM
+        for dev in coordinator.devices_of_type(TYPE_THERM)
     )
 
 

@@ -127,6 +127,8 @@ Každý regulátor místnosti v iNELS se v HA objeví jako entita `climate` (re�
 
 - Seznam zařízení se načte jednou při startu integrace. Hodnoty všech zařízení se pak čtou každých **5 sekund** jedním požadavkem.
 - Příkazy se odesílají postupně, jeden po druhém. Odeslaný stav se zobrazí hned a drží se, dokud ho nepotvrdí čtení z jednotky (nejvýš 6 s, u presetů topení 20 s), takže entita neproblikává, než centrální jednotka změnu provede.
+- Každé volání Connection Serveru má časový limit 10 sekund, zaseknutý server tak nezablokuje Home Assistant.
+- Zařízení, jehož proměnnou Connection Server nepublikuje, se přeskočí (s varováním v logu) a nerozbije celou platformu.
 - Když Connection Server při startu Home Assistantu neodpovídá, integrace se zkouší nastavit znovu automaticky. Když přestane odpovídat později, všechny její entity přejdou do stavu **nedostupné** a vrátí se po prvním úspěšném čtení; výpadek se zaloguje jednou.
 - Příkaz, který se nepodaří doručit, zobrazí v UI chybu (a zastaví krok automatizace), místo aby se tiše ztratil.
 

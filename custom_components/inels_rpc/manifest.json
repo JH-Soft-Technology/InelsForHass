@@ -14,7 +14,7 @@
     "pyinels"
   ],
   "requirements": [
-    "pyinels==0.7.0"
+    "pyinels==0.7.1"
   ],
   "version": "0.5.0"
 }

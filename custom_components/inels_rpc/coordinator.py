@@ -64,6 +64,17 @@ class InelsDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any] | None]):
         # call to the Connection Server (reads and writes) goes through it.
         self.api_lock = asyncio.Lock()
 
+    def devices_of_type(self, inels_type: str) -> list[Device]:
+        """Devices of the type which have a value.
+
+        A device without a value has a variable which the Connection Server
+        does not publish; pyinels skips such variables until a reload."""
+        return [
+            dev
+            for dev in self.devices
+            if dev.type == inels_type and dev.value is not None
+        ]
+
     async def async_api_call(self, func: Callable[..., Any], *args: Any) -> Any:
         """Run a blocking pyinels call, one at a time."""
         async with self.api_lock:
@@ -80,6 +91,13 @@ class InelsDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any] | None]):
                 translation_placeholders={"error": str(err)},
             ) from err
         _LOGGER.debug("Loaded %s devices from the Connection Server", len(self.devices))
+        for dev in self.devices:
+            if dev.value is None:
+                _LOGGER.warning(
+                    "Skipping %s (%s), the Connection Server does not publish its value",
+                    dev.title,
+                    dev.id,
+                )
 
     async def _async_update_data(self) -> dict[str, Any] | None:
         """Read the values of all devices."""
