@@ -14,15 +14,30 @@ InelsForHass gives you a chance to control your proprietary Inels devieces throu
 - [x] Switches
 - [x] Shades
 - [x] Garage doors
-- [ ] Heating
+- [x] Heating (room controllers as `climate` entities + room temperature `sensor`)
 - [ ] Weather stations
 - [ ] Lara radio
+
+## Heating
+
+Every iNELS `heat-control` room regulator is exposed as a `climate` entity (HVAC mode `heat`) together with a room temperature `sensor`.
+
+- The current temperature is read from `<room>_Temperature`.
+- The **preset** selects the active iNELS level: `minimum`, `attenuation` (Útlum), `normal`, `comfort`. Selecting a preset writes `<room>_V<level>=1`.
+- The target temperature is shown read-only. iNELS calculates it from the active level, so it cannot be set directly. The temperatures of the levels are configured in iNELS IDM.
+- Valves and heat demand are not published by the Connection Server and are therefore not available.
+
+> **Note:** the iNELS time programs keep switching levels automatically, so a preset selected from Home Assistant is overridden at the next program change. Every preset change is a write into the central unit — use automations with hysteresis and a sensible minimum interval.
+
+The room variables (`*_Temperature`, `*_StateTH`, `*_State*`, `*_V*`) must be exported from IDM (`export.pub`); nothing needs to be changed in the PLC.
 
 ## HowTo
 
 At the beginning you need to install [HACS](https://hacs.xyz/) into your home assistant instance. All you need to know about instalation is on the web site.
 
-When you have HACS installed, then open the HACS UI. Go into the integration section. In the top right corner are three dots. Click and select *Custom repositories*.
+When you have HACS installed, click the button below, or open the HACS UI, go into the integration section, click the three dots in the top right corner and select *Custom repositories*.
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JH-Soft-Technology&repository=InelsForHass&category=integration)
 
 Copy URL of IneslForHass (https://github.com/JH-Soft-Technology/InelsForHass) repo into repository field and select category integration.
 
