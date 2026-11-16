@@ -1,5 +1,4 @@
 __pycache__
-.github
 .vscode
 # local Home Assistant dev instance
 /.HA_VERSION
