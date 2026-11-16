@@ -1,101 +1,132 @@
-"""Config flow for inels integration."""
+"""Config flow of the iNELS integration."""
 
 from __future__ import annotations
 
 import logging
 from typing import Any
 
-import voluptuous as vol
-
-from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.exceptions import HomeAssistantError
-
+import voluptuous as vol
 from pyinels.api import Api
 
 from .const import (
+    CONF_UNIT,
+    DEFAULT_PORT,
+    DEFAULT_UNIT,
     DOMAIN,
-    HOST_STR,
-    PORT_STR,
+    PYINELS_ERRORS,
     TITLE,
-    UNIT_STR,
-    USER_STR,
-    TITLE_STR,
-    ERROR_BASE_INVALID_AUTH,
-    ERROR_BASE,
-    ERROR_BASE_CANNOT_CONNECT,
-    ERROR_BASE_UNKNOWN,
 )
-
-DESCRIPTION_PLACEHOLDERS = {
-    "docs_url": "https://github.com/JH-Soft-Technology/InelsForHass"
-}
+from .coordinator import bare_host, build_url, entry_unique_id
 
 _LOGGER = logging.getLogger(__name__)
 
-
-STEP_USER_DATA_SCHEMA = vol.Schema(
-    {
-        vol.Required(HOST_STR): str,
-        vol.Required(PORT_STR): int,
-        vol.Required(UNIT_STR): str,
-    }
-)
-
 DESCRIPTION_PLACEHOLDERS = {
     "docs_url": "https://github.com/JH-Soft-Technology/InelsForHass"
 }
 
-
-async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect."""
-
-    api = Api(data[HOST_STR], data[PORT_STR], data[UNIT_STR])
-
-    # when PyPI library has no async methods then is neccessary to wrapp them into
-    # the hass.async_add_executor_job(func, param1[x], param2[y])
-    ping = await hass.async_add_executor_job(api.ping)
-
-    if ping == False:
-        raise CannotConnect
-
-    # Return info that you want to store in the config entry.
-    return {TITLE_STR: TITLE, "Data": data}
+PORT_VALIDATOR = vol.All(vol.Coerce(int), vol.Range(min=1, max=65535))
 
 
-class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for inels."""
+def _user_schema(defaults: dict[str, Any]) -> vol.Schema:
+    return vol.Schema(
+        {
+            vol.Required(
+                CONF_HOST, default=defaults.get(CONF_HOST, vol.UNDEFINED)
+            ): str,
+            vol.Required(
+                CONF_PORT, default=defaults.get(CONF_PORT, DEFAULT_PORT)
+            ): PORT_VALIDATOR,
+            vol.Required(CONF_UNIT, default=defaults.get(CONF_UNIT, DEFAULT_UNIT)): str,
+        }
+    )
+
+
+def _reconfigure_schema(defaults: dict[str, Any]) -> vol.Schema:
+    return vol.Schema(
+        {
+            vol.Required(CONF_HOST, default=defaults[CONF_HOST]): str,
+            vol.Required(CONF_PORT, default=defaults[CONF_PORT]): PORT_VALIDATOR,
+        }
+    )
+
+
+async def _async_validate(flow: ConfigFlow, host: str, port: int) -> dict[str, str]:
+    """Ping the Connection Server, return the form errors."""
+    api = Api(build_url(host), str(port), DEFAULT_UNIT)
+    try:
+        if not await flow.hass.async_add_executor_job(api.ping):
+            raise CannotConnect
+    except (CannotConnect, *PYINELS_ERRORS):
+        return {"base": "cannot_connect"}
+    except Exception:  # pylint: disable=broad-except
+        _LOGGER.exception("Unexpected exception")
+        return {"base": "unknown"}
+    return {}
+
+
+class InelsConfigFlow(ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for iNELS."""
 
     VERSION = 1
+    MINOR_VERSION = 2
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.ConfigFlowResult:
+    ) -> ConfigFlowResult:
         """Handle the initial step."""
-        if user_input is None:
-            return self.async_show_form(
-                step_id=USER_STR,
-                data_schema=STEP_USER_DATA_SCHEMA,
-                description_placeholders=DESCRIPTION_PLACEHOLDERS,
-            )
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            host = bare_host(user_input[CONF_HOST])
+            port = user_input[CONF_PORT]
+            await self.async_set_unique_id(entry_unique_id(host, port))
+            self._abort_if_unique_id_configured()
 
-        errors = {}
-
-        try:
-            info = await validate_input(self.hass, user_input)
-        except CannotConnect:
-            errors[ERROR_BASE] = ERROR_BASE_CANNOT_CONNECT
-        except InvalidAuth:
-            errors[ERROR_BASE] = ERROR_BASE_INVALID_AUTH
-        except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception("Unexpected exception")
-            errors[ERROR_BASE] = ERROR_BASE_UNKNOWN
-        else:
-            return self.async_create_entry(title=info[TITLE_STR], data=user_input)
+            errors = await _async_validate(self, host, port)
+            if not errors:
+                return self.async_create_entry(
+                    title=f"{TITLE} ({host})",
+                    data={**user_input, CONF_HOST: host},
+                )
 
         return self.async_show_form(
-            step_id=USER_STR,
-            data_schema=STEP_USER_DATA_SCHEMA,
+            step_id="user",
+            data_schema=_user_schema(user_input or {}),
+            errors=errors,
+            description_placeholders=DESCRIPTION_PLACEHOLDERS,
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Change the address of the Connection Server."""
+        entry = self._get_reconfigure_entry()
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            host = bare_host(user_input[CONF_HOST])
+            port = user_input[CONF_PORT]
+            unique_id = entry_unique_id(host, port)
+            if unique_id != entry.unique_id:
+                await self.async_set_unique_id(unique_id)
+                self._abort_if_unique_id_configured()
+
+            errors = await _async_validate(self, host, port)
+            if not errors:
+                return self.async_update_reload_and_abort(
+                    entry,
+                    unique_id=unique_id,
+                    data_updates={CONF_HOST: host, CONF_PORT: port},
+                )
+
+        defaults = user_input or {
+            CONF_HOST: bare_host(entry.data[CONF_HOST]),
+            CONF_PORT: entry.data[CONF_PORT],
+        }
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=_reconfigure_schema(defaults),
             errors=errors,
             description_placeholders=DESCRIPTION_PLACEHOLDERS,
         )
@@ -103,7 +134,3 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""
-
-
-class InvalidAuth(HomeAssistantError):
-    """Error to indicate there is invalid auth."""
