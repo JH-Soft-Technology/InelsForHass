@@ -1,188 +1,102 @@
-"""Light platform for inels."""
+"""Light platform of the iNELS integration."""
 
-import logging
+from __future__ import annotations
 
-from pyinels.device.pyLight import pyLight
+from typing import Any
+
+from homeassistant.components.light import ATTR_BRIGHTNESS, ColorMode, LightEntity
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from pyinels.const import RANGE_BRIGHTNESS
+from pyinels.device.pyLight import pyLight
 
-from homeassistant.components.light import (
-    ATTR_BRIGHTNESS,
-    ColorMode,
-    LightEntity,
-)
+from . import InelsConfigEntry
+from .const import TYPE_LIGHT
+from .entity import InelsEntity
 
-from custom_components.inels_rpc.entity import InelsEntity
-from custom_components.inels_rpc.const import (
-    DOMAIN,
-    DOMAIN_DATA,
-    ICON_LIGHT,
-    PLATFORM_LIGHT,
-)
-
-_LOGGER = logging.getLogger(__name__)
+PARALLEL_UPDATES = 1
 
 MIN_BRIGHTNESS = RANGE_BRIGHTNESS[0]
 MAX_BRIGHTNESS = RANGE_BRIGHTNESS[1]
 
 
-async def async_setup_entry(hass, entry, async_add_devices):
-    """Setup light platform."""
-
-    _LOGGER.info("Setting up lights")
-
-    devices = hass.data[DOMAIN][DOMAIN_DATA]
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-
-    dimmable_lights = []
-    usual_lights = []
-
-    lights = [
-        await hass.async_add_executor_job(pyLight, dev)
-        for dev in devices
-        if dev.type == PLATFORM_LIGHT
-    ]
-
-    for light in lights:
-        if light.has_brightness is True:
-            dimmable_lights.append(light)
-        else:
-            usual_lights.append(light)
-
-    await coordinator.async_refresh()
-
-    if len(usual_lights) > 0:
-        async_add_devices(
-            [InelsLight(coordinator, light) for light in usual_lights], True
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: InelsConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
+) -> None:
+    """Set up the lights."""
+    coordinator = entry.runtime_data
+    lights = [pyLight(dev) for dev in coordinator.devices if dev.type == TYPE_LIGHT]
+    async_add_entities(
+        (
+            InelsLightDimmable(coordinator, light)
+            if light.has_brightness
+            else InelsLight(coordinator, light)
         )
-
-    if len(dimmable_lights) > 0:
-        async_add_devices(
-            [InelsLightDimmable(coordinator, light) for light in dimmable_lights], True
-        )
+        for light in lights
+    )
 
 
-class InelsLightBase(InelsEntity, LightEntity):
-    """Inels base light class."""
+class InelsLight(InelsEntity, LightEntity):
+    """On/off light."""
 
-    def __init__(self, coordinator, light):
-        """Initialize of the InelsLight."""
-        super().__init__(coordinator, light)
+    _attr_name = None
+    _attr_translation_key = "light"
+    _attr_color_mode = ColorMode.ONOFF
+    _attr_supported_color_modes = {ColorMode.ONOFF}
 
-        self._light = light
-        self._coordinator = coordinator
-        self._state = False
+    device: pyLight
 
-    async def async_turn_on(self, **kwargs):  # pylint: disable=unused-argument
+    @property
+    def is_on(self) -> bool:
+        """Return true if the light is on."""
+        return self._value(self.device.state)
+
+    def _actual_value(self) -> Any:
+        return self.device.state
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on the light."""
-        await self.hass.async_add_executor_job(self._light.turn_on)
-        self._state = True
+        await self._async_write(self.device.turn_on)
         self._set_pending(True)
 
-    async def async_turn_off(self, **kwargs):  # pylint: disable=unused-argument
+    async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn off the light."""
-        await self.hass.async_add_executor_job(self._light.turn_off)
-        self._state = False
+        await self._async_write(self.device.turn_off)
         self._set_pending(False)
 
-    @property
-    def color_mode(self):
-        """Return color mode of the light."""
-        return ColorMode.ONOFF
+
+class InelsLightDimmable(InelsLight):
+    """Dimmable light, iNELS brightness is 0-100 %."""
+
+    _attr_color_mode = ColorMode.BRIGHTNESS
+    _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
 
     @property
-    def supported_color_modes(self) -> set[ColorMode] | set[str] | None:
-        """Flag supported color modes. Overrided."""
-        return {ColorMode.ONOFF}
-
-    @property
-    def name(self):
-        """Return the name of the light."""
-        return self._light.name
-
-    @property
-    def icon(self):
-        """Return the icon of this light."""
-        return ICON_LIGHT
-
-    @property
-    def is_on(self):
-        """Return true if the light is on."""
-        return self._value(self._light.state)
-
-    def _actual_value(self):
-        return self._light.state
-
-    def update(self):
-        """Update the data from the device."""
-        return self.update()
-
-
-class InelsLight(InelsLightBase, LightEntity):
-    """Inels light class."""
-
-    def __init__(self, coordinator, light):
-        """Initialize of the InelsLight."""
-        super().__init__(coordinator, light)
-
-
-class InelsLightDimmable(InelsLightBase, LightEntity):
-    """Inels dimmable light class."""
-
-    def __init__(self, coordinator, light):
-        """Initialize of the InelsLightDimmable."""
-        super().__init__(coordinator, light)
-
-        self._brightness = None
-        self._features = 0
-        self._light = light
-        self._coordinator = coordinator
-        self._state = False
-
-    @property
-    def brightness(self):
+    def brightness(self) -> int:
         """Return the brightness of the light."""
-        self._brightness = self._value(self._light.brightness())
-
-        return int(self._brightness * 2.55)
+        return round(self._value(self.device.brightness()) * 255 / MAX_BRIGHTNESS)
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if the light is on."""
-        return self._value(self._light.brightness()) > MIN_BRIGHTNESS
+        return self._value(self.device.brightness()) > MIN_BRIGHTNESS
 
-    def _actual_value(self):
-        return self._light.brightness()
+    def _actual_value(self) -> Any:
+        return self.device.brightness()
 
-    async def async_turn_off(self, **kwargs):  # pylint: disable=unused-argument
-        """Turn off the light."""
-        await self.hass.async_add_executor_job(self._light.turn_off)
-        self._state = False
-        self._set_pending(MIN_BRIGHTNESS)
-
-    @property
-    def color_mode(self):
-        """Return color mode of the light."""
-        return ColorMode.BRIGHTNESS
-
-    @property
-    def supported_color_modes(self) -> set[ColorMode] | set[str] | None:
-        """Flag supported color modes. Overrided."""
-        return {ColorMode.BRIGHTNESS}
-
-    async def async_turn_on(self, **kwargs):  # pylint: disable=unused-argument
-        """Turn on the light."""
-        brightness = 0
-
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn on the light, optionally with the brightness."""
         if ATTR_BRIGHTNESS in kwargs:
-            brightness = int(kwargs[ATTR_BRIGHTNESS] / 2.55)
-            self._brightness = brightness
-            await self.hass.async_add_executor_job(
-                self._light.set_brightness, float(brightness)
-            )
-            self._state = self._light.state
+            brightness = round(kwargs[ATTR_BRIGHTNESS] * MAX_BRIGHTNESS / 255)
+            await self._async_write(self.device.set_brightness, float(brightness))
         else:
-            await self.hass.async_add_executor_job(self._light.turn_on)
-            self._brightness = MAX_BRIGHTNESS
-            self._state = True
+            brightness = MAX_BRIGHTNESS
+            await self._async_write(self.device.turn_on)
+        self._set_pending(brightness)
 
-        self._set_pending(self._brightness)
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn off the light."""
+        await self._async_write(self.device.turn_off)
+        self._set_pending(MIN_BRIGHTNESS)

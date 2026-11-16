@@ -1,0 +1,41 @@
+{
+  "entity": {
+    "climate": {
+      "heat_control": {
+        "default": "mdi:radiator",
+        "state_attributes": {
+          "preset_mode": {
+            "default": "mdi:thermostat",
+            "state": {
+              "minimum": "mdi:snowflake-thermometer",
+              "attenuation": "mdi:weather-night",
+              "normal": "mdi:home-thermometer",
+              "comfort": "mdi:sofa"
+            }
+          }
+        }
+      }
+    },
+    "cover": {
+      "shutter": {
+        "default": "mdi:window-shutter-open",
+        "state": {
+          "closed": "mdi:window-shutter"
+        }
+      }
+    },
+    "light": {
+      "light": {
+        "default": "mdi:lightbulb"
+      }
+    },
+    "switch": {
+      "door": {
+        "default": "mdi:gate"
+      },
+      "switch": {
+        "default": "mdi:power-socket"
+      }
+    }
+  }
+}
