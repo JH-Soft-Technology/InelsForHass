@@ -7,7 +7,7 @@ from homeassistant.const import Platform
 from pyinels.exception import ApiException
 
 DOMAIN = "inels_rpc"
-VERSION = "0.5.0"
+VERSION = "0.5.1"
 
 TITLE = "iNELS"
 MANUFACTURER = "ELKO EP"
