@@ -38,9 +38,12 @@ class InelsShutter(InelsEntity, CoverEntity):
     """Shutter driven by the up and down relays.
 
     The central unit does not report the position, so only open, close
-    and stop are supported."""
+    and stop are supported. Open/closed is derived from the last movement
+    and can be wrong after a stop or a restart, so the state is assumed and
+    both open and close stay available."""
 
     _attr_name = None
+    _attr_assumed_state = True
     _attr_translation_key = "shutter"
     _attr_device_class = CoverDeviceClass.SHUTTER
     _attr_supported_features = (

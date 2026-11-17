@@ -215,6 +215,8 @@ async def test_cover(
         CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE | CoverEntityFeature.STOP
     )
     assert "current_position" not in state.attributes
+    # Position is unknown, so open and close must both stay available.
+    assert state.attributes["assumed_state"] is True
 
     await hass.services.async_call(
         COVER_DOMAIN,
